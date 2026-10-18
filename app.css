@@ -1,0 +1,166 @@
+/* ============================================================
+   Javas Exchange — app shell
+   Sidebar shares the canvas. A hairline rule is enough; a coloured
+   rail would split the screen into "nav world" and "content world".
+   ============================================================ */
+
+body{display:grid;grid-template-columns:244px minmax(0,1fr);min-height:100vh}
+
+/* ---------- sidebar ---------- */
+.side{
+  background:var(--rail);color:#fff;
+  padding:var(--s5) var(--s3) var(--s4);
+  display:flex;flex-direction:column;gap:var(--s6);
+  position:sticky;top:0;height:100vh;
+}
+
+.logo{display:flex;align-items:center;gap:var(--s2);padding:0 var(--s2) 0 var(--s3)}
+.logo svg{height:26px;flex:none}
+.logo b{font-size:14px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#fff}
+.logo b span{color:rgba(255,255,255,.52);font-weight:400}
+
+.side nav{display:grid;gap:1px}
+.side nav .lbl{
+  font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:rgba(255,255,255,.38);font-weight:500;padding:var(--s5) var(--s3) var(--s2);
+}
+.side nav a{
+  position:relative;display:flex;align-items:center;gap:10px;
+  min-height:36px;padding:0 var(--s3);border-radius:var(--r-sm);
+  color:rgba(255,255,255,.68);font-size:var(--t-body);font-weight:400;
+  transition:background .14s var(--ease),color .14s var(--ease);
+}
+.side nav a:hover{background:rgba(255,255,255,.07);color:#fff;text-decoration:none}
+.side nav a.on{background:rgba(255,255,255,.11);color:#fff;font-weight:500}
+.side nav a.on::before{
+  content:"";position:absolute;left:-12px;top:50%;translate:0 -50%;
+  width:3px;height:16px;border-radius:0 2px 2px 0;background:var(--signal);
+}
+.side nav a i{font-size:16px;color:rgba(255,255,255,.5);width:18px;flex:none}
+.side nav a.on i{color:var(--signal)}
+
+.who{
+  margin-top:auto;display:flex;align-items:center;gap:10px;
+  padding:var(--s2) var(--s3);border-radius:var(--r-sm);
+  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);
+}
+.who .av{
+  width:30px;height:30px;border-radius:50%;flex:none;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--flag),var(--signal));
+  color:var(--deep);font-size:11px;font-weight:600;letter-spacing:.02em;
+}
+.who .n{font-size:13px;font-weight:500;color:#fff}
+.who .t{font-size:var(--t-meta);color:rgba(255,255,255,.5)}
+
+/* ---------- page ---------- */
+main{padding:var(--s6) var(--s8) var(--s10);display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s6);align-content:start;min-width:0;
+  /* the landing page's column grid, faint: four ruled columns behind the cards,
+     showing through only in the gutters */
+  background-image:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),var(--rule-soft) calc(25% - 1px) 25%)}
+
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s5);flex-wrap:wrap}
+.top h1{font-size:var(--t-h1);font-weight:600}
+/* the header masks the column lines behind it — lines cross space, never text */
+/* main > .top, not .top: the dashboard's peg panel reuses the class for its own header */
+main > .top{padding-bottom:var(--s5);border-bottom:1px solid var(--rule);background:var(--canvas)}
+/* the subtitle reads as a ledger line: mono, led by the accent square */
+main > .top p{display:flex;align-items:center;gap:10px;margin-top:8px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+main > .top p::before{content:"";width:8px;height:8px;flex:none;background:var(--signal)}
+.top .acts{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:var(--s2);align-items:center}
+
+/* card titles are section markers, as on the landing page: ■ + mono caps */
+.card h3{
+  font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink);margin-bottom:var(--s4);
+  display:flex;align-items:center;gap:10px;
+}
+.card h3::before{content:"";width:8px;height:8px;flex:none;background:var(--signal)}
+.card h3 a{margin-left:auto;font-size:11px;font-weight:500;color:var(--ink-2)}
+.card h3 a:hover{color:var(--accent)}
+
+/* ---------- tables ---------- */
+table{width:100%;border-collapse:collapse;font-size:var(--t-body)}
+th{
+  text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;padding:0 0 var(--s2);
+}
+th:last-child,td:last-child{text-align:right}
+td{padding:11px 0;border-top:1px solid var(--rule-soft);color:var(--ink)}
+.num{font-variant-numeric:tabular-nums}
+
+/* direction is never colour alone — the glyph carries it too */
+.gain{color:var(--gain)} .loss{color:var(--loss)}
+.gain::before{content:"▲ ";font-size:.72em;vertical-align:.08em}
+.loss::before{content:"▼ ";font-size:.72em;vertical-align:.08em}
+
+.pair{display:flex;align-items:center;gap:10px}
+.coin{
+  width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;
+  font-size:12px;font-weight:600;color:#fff;
+}
+.pair .nm{font-weight:500}
+.pair .sm{font-size:var(--t-label);color:var(--ink-3)}
+.mini{height:24px;width:72px}
+
+/* ---------- list rows ---------- */
+.act{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) 0;border-top:1px solid var(--rule-soft)}
+.act:first-of-type{border-top:0;padding-top:0}
+.act .ic{
+  width:32px;height:32px;border-radius:var(--r-sm);flex:none;display:grid;place-items:center;
+  background:var(--sheet-sunk);border:1px solid var(--rule-soft);font-size:15px;color:var(--ink-2);
+}
+.act .m{flex:1;min-width:0}
+.act .m .t{font-size:var(--t-body);font-weight:500}
+.act .m .s{font-size:var(--t-label);color:var(--ink-3)}
+.act .amt{font-size:var(--t-body);font-weight:500;font-variant-numeric:tabular-nums;text-align:right}
+/* amount + status stack flush to the right edge — aligning only the amount
+   leaves the tag ragged underneath it */
+.act > :last-child{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+
+/* ---------- status ---------- */
+.tag{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 8px;border-radius:var(--r-sm);
+  background:var(--sheet-sunk);color:var(--ink-3);border:1px solid var(--rule-soft);
+}
+.tag::before{content:"";width:5px;height:5px;background:currentColor}
+.tag.ok{color:var(--gain)}
+.tag.pend{color:var(--ink-2)}
+.tag.pend::before{background:var(--flag)}
+
+@media (max-width:860px){
+  body{grid-template-columns:1fr}
+  .side{position:static;height:auto;border-right:0;border-bottom:1px solid var(--rule)}
+  main{padding:var(--s5) var(--s4) var(--s8);background-image:none}
+}
+
+/* ---------- header bell + wallet chip (topbar.js) ---------- */
+.tb{display:flex;gap:var(--s2);align-items:center}
+.tb-bell,.tb-wallet{position:relative;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 12px;
+  border:1px solid var(--rule-strong);border-radius:var(--r);background:var(--sheet);color:var(--ink);
+  font:inherit;font-family:var(--mono);font-size:13px;cursor:pointer;text-decoration:none;
+  transition:background .14s var(--ease),border-color .14s var(--ease)}
+.tb-bell{width:40px;padding:0;justify-content:center;font-size:17px}
+.tb-bell:hover,.tb-wallet:hover{background:var(--tint);text-decoration:none}
+.tb-wallet i{color:var(--signal);font-size:16px}
+.tb-bell .dot{display:none;position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;
+  background:var(--signal);box-shadow:0 0 0 2px var(--sheet)}
+.tb-bell.has .dot{display:block}
+.tb-notes{position:fixed;inset:auto;margin:0;width:min(360px,calc(100vw - 24px));padding:0;
+  border:1px solid var(--rule-strong);border-radius:var(--r-md);background:var(--sheet-raised,var(--sheet));color:var(--ink);
+  box-shadow:0 18px 50px -18px rgba(20,13,36,.35)}
+.tb-notes .hd{display:flex;align-items:center;justify-content:space-between;padding:var(--s3) var(--s4);border-bottom:1px solid var(--rule-soft)}
+.tb-notes .hd b{font-size:14px;font-weight:600}
+.tb-notes .hd button{border:0;background:none;font:inherit;font-size:var(--t-label);font-weight:500;color:var(--accent);cursor:pointer}
+.tb-notes .it{display:grid;grid-template-columns:28px minmax(0,1fr) 8px;gap:var(--s3);align-items:start;padding:var(--s3) var(--s4);
+  border-bottom:1px solid var(--rule-soft);color:var(--ink);text-decoration:none}
+.tb-notes .it:hover{background:var(--tint);text-decoration:none}
+.tb-notes .it > i{width:28px;height:28px;display:grid;place-items:center;border-radius:var(--r-sm);background:var(--sheet-sunk);color:var(--ink-2);font-size:14px}
+.tb-notes .it b{display:block;font-size:13px;font-weight:500;line-height:1.35}
+.tb-notes .it small{display:block;font-size:var(--t-label);color:var(--ink-3);margin-top:2px}
+.tb-notes .it.new::after{content:"";width:7px;height:7px;margin-top:6px;border-radius:50%;background:var(--signal)}
+.tb-notes .it:not(.new) b{font-weight:400;color:var(--ink-2)}
+.tb-notes .foot{display:block;padding:var(--s3) var(--s4);text-align:center;font-size:13px;font-weight:500;color:var(--ink-2)}
+@media (max-width:560px){ .tb-wallet span{display:none} .tb-wallet{width:40px;padding:0;justify-content:center} }

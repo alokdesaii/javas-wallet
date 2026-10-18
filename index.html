@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow"><!-- preview in review: remove at launch -->
+<title>Wallet — Javas Exchange</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+<!-- brand.css / app.css / theme.js are copied verbatim from the web app — keep them in sync, don't fork -->
+<link rel="stylesheet" href="brand.css">
+<link rel="stylesheet" href="app.css">
+<script src="theme.js"></script>
+<style>
+/* ============================================================
+   Javas Wallet — the exchange's self-contained wallet app.
+   Same tokens, cut-corner buttons, mono section markers and
+   ledger rules as the web and mobile apps. Mobile-first: one
+   column, bottom tab bar, sheets instead of dialogs.
+   ============================================================ */
+body{display:block;background:var(--canvas)}            /* app.css lays out a sidebar grid; the wallet has none */
+.app{max-width:460px;min-height:100dvh;margin:0 auto;background:var(--canvas);display:flex;flex-direction:column;
+  border-inline:1px solid var(--rule-soft);padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+
+/* header */
+.hd{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:var(--s3);padding:var(--s3) var(--s4);
+  background:var(--canvas);border-bottom:1px solid var(--rule)}
+.hd .logo{padding:0;gap:10px}
+.hd .logo svg{height:24px}
+.hd .logo b{font-size:13px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--ink)}
+.hd .logo b span{color:var(--ink-3);font-weight:400}
+.hd h1{font-size:var(--t-h3);font-weight:600;flex:1}
+.hd .sp{flex:1}
+.ib{width:40px;height:40px;flex:none;display:grid;place-items:center;border:1px solid var(--rule-strong);border-radius:var(--r);
+  background:transparent;color:var(--ink-2);font-size:18px;cursor:pointer;position:relative}
+.ib:hover{background:var(--tint);color:var(--ink)}
+.ib.bare{border-color:transparent}
+.ib .dot{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 2px var(--canvas)}
+
+.pg{padding:var(--s4);display:grid;gap:var(--s4);align-content:start}
+.pg > .lead-k{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.pg > .lead-k::before{content:"";width:8px;height:8px;background:var(--signal)}
+
+/* hero balance — the dashboard's lilac panel */
+.hero{background:var(--hero);border-color:transparent;padding:var(--s5)}
+.k{font-size:var(--t-meta);letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+.kh{display:flex;align-items:center;justify-content:space-between;gap:var(--s3)}
+.eye{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:4px 6px;margin:-4px;font:inherit;
+  font-size:var(--t-label);color:var(--ink-3);cursor:pointer;border-radius:var(--r-sm)}
+.eye:hover{color:var(--ink)}
+.figure{font-size:34px;font-weight:600;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums;margin-top:8px}
+.eq{margin-top:6px;font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.pnl{margin-top:var(--s3);font-size:13px;font-weight:500}
+.wsel{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid rgba(37,22,91,.22);background:transparent;color:var(--ink-2);padding:4px 8px;border-radius:var(--r-sm);cursor:pointer}
+:root[data-theme="dark"] .wsel{border-color:rgba(255,255,255,.18)}
+.alloc{display:flex;height:6px;border-radius:3px;overflow:hidden;gap:2px;margin-top:var(--s5)}
+.alloc i{display:block;min-width:3px}
+
+/* four primary actions — the dashboard's pastel tiles, square and compact */
+.qa{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s2)}
+.qa button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:var(--s3) 0;border:0;border-radius:var(--r-md);
+  background:var(--tone);color:var(--deep);font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:transform .16s var(--ease)}
+.qa button:hover{transform:translateY(-2px)}
+.qa i{font-size:22px}
+.blush{--tone:#f7dcd9}.sand{--tone:#f8e7c2}.lilac{--tone:#ded6f0}.mist{--tone:#e5e1ea}
+:root[data-theme="dark"] .qa button{opacity:.92}
+
+/* segmented control, from the web wallet dialog */
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--r-sm);overflow:hidden}
+.seg button{border:0;min-height:36px;background:var(--sheet);font:inherit;font-size:13px;font-weight:500;color:var(--ink-3);cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--deep);color:#fff}
+
+/* asset rows */
+.row{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) 0;border-top:1px solid var(--rule-soft);width:100%;
+  background:none;border-left:0;border-right:0;border-bottom:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.row:first-of-type{border-top:0}
+.row:hover .nm{color:var(--accent)}
+.row .m{flex:1;min-width:0}
+.row .nm{font-weight:500}
+.row .sm{font-size:var(--t-label);color:var(--ink-3)}
+.row .r{text-align:right;font-variant-numeric:tabular-nums}
+.row .r .sm{display:block}
+.coin.lg{width:44px;height:44px;font-size:18px}
+
+/* sheets — bottom drawers, the mobile counterpart of the web dialog */
+.sheet{border:0;padding:0;margin:auto auto 0;width:min(460px,100vw);max-width:100vw;max-height:92dvh;
+  background:var(--sheet-raised);color:var(--ink);border-top:1px solid var(--rule-strong)}
+.sheet::backdrop{background:rgba(20,13,36,.45)}
+.sheet[open]{animation:up .28s var(--ease)}
+@keyframes up{from{translate:0 40px;opacity:0}}
+.sheet .in{padding:var(--s4) var(--s4) calc(var(--s5) + env(safe-area-inset-bottom));display:grid;gap:var(--s4)}
+.sheet .grab{width:36px;height:4px;border-radius:2px;background:var(--rule-strong);margin:0 auto}
+.sheet .sh{display:flex;align-items:center;justify-content:space-between}
+.sheet h2{font-size:var(--t-h3);font-weight:600}
+.steps{display:flex;gap:4px}
+.steps i{flex:1;height:3px;background:var(--rule)}
+.steps i.on{background:var(--signal)}
+
+.unit{position:relative}.unit input{padding-right:96px}
+.unit .u{position:absolute;right:10px;top:50%;translate:0 -50%;display:flex;gap:8px;align-items:center;font-size:var(--t-label);color:var(--ink-3)}
+.unit .u button,.link{border:0;background:none;padding:0;font:inherit;font-weight:600;color:var(--accent);cursor:pointer;font-size:var(--t-label)}
+.big-in{font-size:28px;font-weight:600;min-height:56px;font-variant-numeric:tabular-nums}
+.fl label{display:flex;justify-content:space-between;margin-bottom:5px}
+.fl label b{font-weight:500;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.info{display:grid;border:1px solid var(--rule);border-radius:var(--r-sm);overflow:hidden}
+.info div{display:flex;justify-content:space-between;gap:var(--s3);padding:9px 12px;font-size:13px;border-top:1px solid var(--rule-soft)}
+.info div:first-child{border-top:0}
+.info span{color:var(--ink-3)}
+.info b{font-weight:500;font-variant-numeric:tabular-nums;text-align:right;word-break:break-all}
+.warn{font-size:var(--t-label);color:var(--ink-2);line-height:1.55;padding:10px 12px;border-left:3px solid var(--flag);background:var(--sheet-sunk)}
+.err{font-size:var(--t-label);color:var(--loss);margin-top:6px}
+.qrbox{display:grid;justify-items:center;gap:var(--s3);padding:var(--s4);border:1px solid var(--rule);background:var(--sheet)}
+.qr{width:184px;height:184px;padding:10px;background:#fff;border:1px solid var(--rule)}
+.qr svg{display:block;width:100%;height:100%}
+code.ad{display:block;width:100%;font-family:var(--mono);font-size:12px;word-break:break-all;text-align:center;padding:10px;background:var(--sheet-sunk)}
+.acts2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+.btn.full{width:100%;min-height:48px}
+.swapx{display:grid;place-items:center;margin:-6px 0}
+.swapx button{width:36px;height:36px;border:1px solid var(--rule-strong);background:var(--sheet);color:var(--ink-2);cursor:pointer;font-size:18px;display:grid;place-items:center}
+.otp{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.otp input{text-align:center;font-family:var(--mono);font-size:20px;min-height:52px;padding:0}
+.done{display:grid;justify-items:center;gap:var(--s2);text-align:center;padding:var(--s5) 0}
+.done i{font-size:44px;color:var(--gain)}
+.done b{font-size:var(--t-h3)}
+.done p{color:var(--ink-3);font-size:13px;max-width:30ch}
+
+/* lock screen */
+.lock{position:fixed;inset:0;z-index:20;background:var(--rail);color:#fff;display:grid;place-items:center;padding:var(--s6)}
+.lock .wrap{width:min(320px,100%);display:grid;justify-items:center;gap:var(--s5);text-align:center}
+.lock svg.mark{height:64px}
+.lock .wm{font-size:15px;font-weight:600;letter-spacing:.2em;text-transform:uppercase}
+.lock .wm span{font-weight:400;opacity:.55}
+.lock p{font-size:13px;color:rgba(255,255,255,.6)}
+.pins{display:flex;gap:14px}
+.pins i{width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,.5)}
+.pins i.on{background:var(--signal);border-color:var(--signal)}
+.pins.shake{animation:sh .3s}
+@keyframes sh{25%{translate:-6px}75%{translate:6px}}
+.pad{display:grid;grid-template-columns:repeat(3,72px);gap:12px}
+.pad button{height:56px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#fff;font:inherit;font-size:22px;cursor:pointer;border-radius:var(--r)}
+.pad button:hover{background:rgba(255,255,255,.11)}
+.pad button.ghost{border-color:transparent;background:none;font-size:20px}
+.lock .hint{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+
+/* tab bar */
+.tabbar{position:fixed;bottom:0;left:50%;translate:-50% 0;width:min(460px,100%);z-index:6;display:grid;grid-template-columns:repeat(4,1fr);
+  background:var(--sheet);border-top:1px solid var(--rule);padding-bottom:env(safe-area-inset-bottom)}
+.tabbar a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 9px;font-size:11px;font-weight:500;color:var(--ink-3);position:relative}
+.tabbar a i{font-size:20px}
+.tabbar a:hover{text-decoration:none;color:var(--ink)}
+.tabbar a[aria-current=page]{color:var(--ink)}
+.tabbar a[aria-current=page] i{color:var(--signal)}
+.tabbar a[aria-current=page]::before{content:"";position:absolute;top:-1px;left:30%;right:30%;height:2px;background:var(--signal)}
+
+/* settings list */
+.set{display:flex;align-items:center;gap:var(--s3);padding:12px 0;border-top:1px solid var(--rule-soft);font-size:14px}
+.set:first-of-type{border-top:0;padding-top:0}
+.set > i{font-size:18px;color:var(--ink-2);width:20px}
+.set span{flex:1}
+.set small{display:block;font-size:var(--t-label);color:var(--ink-3)}
+.set em{font-style:normal;font-size:var(--t-label);color:var(--ink-3)}
+.sw{appearance:none;-webkit-appearance:none;width:40px!important;min-height:0!important;height:22px;border-radius:11px!important;padding:0!important;
+  background:var(--rule-strong)!important;position:relative;cursor:pointer;border:0!important;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:translate .16s var(--ease)}
+.sw:checked{background:var(--deep)!important}
+:root[data-theme="dark"] .sw:checked{background:var(--signal)!important}
+.sw:checked::after{translate:18px 0}
+.sw:focus{box-shadow:0 0 0 3px var(--ring)}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.chips button{flex:none;border:1px solid var(--rule-strong);background:var(--sheet);color:var(--ink-2);font:inherit;font-size:12px;font-weight:500;
+  padding:5px 10px;border-radius:var(--r-sm);cursor:pointer}
+.chips button[aria-pressed=true]{background:var(--deep);border-color:var(--deep);color:#fff}
+.empty{padding:var(--s8) 0;text-align:center;color:var(--ink-3);font-size:13px}
+.empty i{display:block;font-size:24px;margin-bottom:6px}
+.day{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);padding:var(--s3) 0 var(--s1)}
+.tag.bad{color:var(--loss)}.tag.bad::before{background:var(--loss)}
+.chart{width:100%;height:120px;display:block}
+.chart path.l{fill:none;stroke:var(--signal);stroke-width:1.6}
+.chart path.a{fill:var(--signal);opacity:.08}
+.toast{position:fixed;left:50%;bottom:90px;translate:-50% 0;z-index:30;background:var(--ink);color:var(--canvas);font-size:13px;padding:10px 14px;border-radius:var(--r)}
+.masked .mny{letter-spacing:.1em}
+</style>
+</head>
+<body>
+
+<!-- ================= lock ================= -->
+<div class="lock" id="lock">
+  <div class="wrap">
+    <svg class="mark" viewBox="0 0 224.34 303.37" aria-hidden="true"><use href="#jx"/></svg>
+    <div class="wm">Javas <span>Wallet</span></div>
+    <p>Enter your 6-digit PIN</p>
+    <div class="pins" id="pins" aria-live="polite"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="pad" id="pad">
+      <button>1</button><button>2</button><button>3</button><button>4</button><button>5</button><button>6</button>
+      <button>7</button><button>8</button><button>9</button>
+      <button class="ghost" data-k="bio" aria-label="Unlock with Face ID"><i class="ri-scan-2-line"></i></button><button>0</button>
+      <button class="ghost" data-k="del" aria-label="Delete digit"><i class="ri-delete-back-2-line"></i></button>
+    </div>
+    <div class="hint">Preview · any 6 digits unlock</div>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="jx2a" x1="0" y1="209.8" x2="224.34" y2="209.8" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#dd3b8c"/><stop offset=".14" stop-color="#b6307e"/><stop offset=".35" stop-color="#81226a"/><stop offset=".56" stop-color="#56165b"/><stop offset=".74" stop-color="#380e50"/><stop offset=".89" stop-color="#250949"/><stop offset="1" stop-color="#1f0847"/></linearGradient><linearGradient id="jx2b" x1="112.17" y1="68.39" x2="112.17" y2="240.23" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#dd3b8c"/><stop offset=".14" stop-color="#b6307e"/><stop offset=".35" stop-color="#81226a"/><stop offset=".56" stop-color="#56165b"/><stop offset=".74" stop-color="#380e50"/><stop offset=".89" stop-color="#250949"/><stop offset="1" stop-color="#1f0847"/></linearGradient><linearGradient id="jx2c" x1="140.21" y1="-89.55" x2="140.21" y2="262.61" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ff9700"/><stop offset="1" stop-color="#dd3b8c"/></linearGradient>
+  <g id="jx"><path fill="url(#jx2a)" d="M112.17,201.81v-7.780c0-42.96-50.22-77.79-112.17-77.79v109.34c0,42.96,50.22,77.79,112.17,77.79s112.17-34.83,112.17-77.79-50.22-23.77-112.17-23.77Z"/><path fill="url(#jx2b)" d="M112.17,252.59v7.78c39.15,0,73.6-13.09,93.67,8,11.68-12.28,18.5-26.97,18.5-42.78,0-42.96-50.22-23.77-112.17-23.77v-7.78c0-42.96-50.22-77.79-112.17-77.79v58.56c61.950,0,112.17,34.83,112.17,77.79Z"/><path fill="url(#jx2c)" d="M224.34,0c-61.95,0-112.17,34.83-112.17,77.79v147.79c0,28.79-22.57,53.9-56.08,67.35,16.5,6.62,35.65,10.43,56.08,10.43,61.95,0,112.17-34.83,112.17-77.79V0h0Z"/></g>
+</defs></svg>
+
+<div class="app" id="app">
+  <header class="hd" id="hd"></header>
+  <main class="pg" id="pg" style="background:none;padding:var(--s4)"></main>
+</div>
+
+<nav class="tabbar" aria-label="Main">
+  <a href="#/"><i class="ri-wallet-3-line"></i>Wallet</a>
+  <a href="#/activity"><i class="ri-file-list-3-line"></i>Activity</a>
+  <a href="#/swap"><i class="ri-arrow-left-right-line"></i>Swap</a>
+  <a href="#/settings"><i class="ri-settings-3-line"></i>Settings</a>
+</nav>
+
+<dialog class="sheet" id="sheet" aria-labelledby="sh-t"><div class="in" id="sh"></div></dialog>
+
+<script>
+/* ponytail: sample data only — same holdings and prices the web wallet shows. Swap HOLD / TX
+   for the wallet API; nothing is signed or broadcast from this page. */
+const HOLD = [
+  ['USDT','Tether',318420,7.8241,'#26a17b','₮',['Ethereum (ERC-20)','Tron (TRC-20)','Solana'],0.01],
+  ['BTC','Bitcoin',2.1840,83560.20*7.8241,'#f7931a','₿',['Bitcoin'],1.82],
+  ['ETH','Ethereum',34.60,2692.40*7.8241,'#627eea','Ξ',['Ethereum (ERC-20)'],-0.61],
+  ['USDC','USD Coin',21400,7.8198,'#2775ca','$',['Ethereum (ERC-20)','Solana'],0.02],
+  ['SOL','Solana',5,117.17*7.8241,'#14b37a','◎',['Solana'],0.18],
+  ['XRP','XRP',200,1.5856*7.8241,'#23292f','✕',['XRP Ledger'],3.66],
+  ['LINK','Chainlink',19.942,12.91*7.8241,'#2a5ada','L',['Ethereum (ERC-20)'],-1.12],
+].map(([sym,name,amt,px,col,gl,nets,chg]) => ({sym,name,amt,px,col,gl,nets,chg,value:amt*px}));
+const BY = Object.fromEntries(HOLD.map(h => [h.sym, h]));
+const FEE = { BTC:0.0002, ETH:0.0015, SOL:0.01, XRP:0.2, LINK:0.3, USDT:1, USDC:1 };
+const BOOK = [ // whitelisted addresses
+  { name:'Javas Exchange account', note:'Spot wallet · UID 9642943', sym:'*', net:'*', addr:'internal' },
+  { name:'Treasury cold wallet', note:'Ethereum (ERC-20)', sym:'*', net:'Ethereum (ERC-20)', addr:'0x3f9a…c41e' },
+  { name:'Fireblocks vault', note:'Bitcoin', sym:'BTC', net:'Bitcoin', addr:'bc1q…9c2e' },
+  { name:'OTC settlement', note:'Tron (TRC-20)', sym:'USDT', net:'Tron (TRC-20)', addr:'TQ7x…kP2a' },
+];
+const TX = [
+  ['in','USDT',50000,'From Javas Exchange account','Today · 10:44','ok','Completed'],
+  ['out','BTC',0.25,'To Fireblocks vault ••9c2e','Today · 09:12','pend','Confirming 2/3'],
+  ['swap','ETH',1.2,'Swapped from 3,230.88 USDT','Yesterday · 18:03','ok','Completed'],
+  ['in','SOL',5,'From 7Hk2…aQ9d','Yesterday · 11:20','ok','Completed'],
+  ['out','USDT',12000,'To OTC settlement ••Q7xk','16 Oct · 15:47','ok','Completed'],
+  ['out','ETH',4,'To 0x91c0…f22a','14 Oct · 08:30','bad','Rejected by approver'],
+  ['in','BTC',0.5,'From Javas Exchange account','12 Oct · 21:05','ok','Completed'],
+].map(([dir,sym,amt,who,when,st,stx],i) => ({id:i,dir,sym,amt,who,when,st,stx}));
+
+const $ = s => document.querySelector(s);
+const dp = h => h.px < 50 ? 2 : 4;
+const f = (v, d = 2) => v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+const TOTAL = HOLD.reduce((t, h) => t + h.value, 0);
+let hidden = false, cur = 'HKD';
+try { hidden = localStorage.getItem('jvx:hide') === '1'; cur = localStorage.getItem('jvx:wcur') || 'HKD'; } catch (e) {}
+const RATE = { HKD:1, USD:1/7.8203, USDT:1/7.8241 }, PRE = { HKD:'HK$ ', USD:'US$ ', USDT:'' }, SUF = { HKD:'', USD:'', USDT:' USDT' };
+const money = hkd => hidden ? '••••••' : PRE[cur] + f(hkd * RATE[cur]) + SUF[cur];
+const mask = s => hidden ? '••••' : s;
+const coin = (h, lg) => `<div class="coin${lg ? ' lg' : ''}" style="background:${h.col}" aria-hidden="true">${h.gl}</div>`;
+const chg = c => `<span class="${c >= 0 ? 'gain' : 'loss'}">${f(Math.abs(c))}%</span>`;
+const LOGO = `<div class="logo"><svg viewBox="0 0 224.34 303.37" aria-hidden="true"><use href="#jx"/></svg><b>Javas <span>Wallet</span></b></div>`;
+const toast = t => { const d = Object.assign(document.createElement('div'), { className:'toast', role:'status', textContent:t }); document.body.append(d); setTimeout(() => d.remove(), 2200); };
+
+/* deterministic fakes — shaped like the network's, never real (same as web wallet) */
+const hash = s => [...s].reduce((h, c) => Math.imul(h, 31) + c.charCodeAt(0) | 0, 7) >>> 0;
+const addrFor = (sym, net) => {
+  let s = hash(sym + net);
+  const pick = (al, n) => { let r = ''; for (let i = 0; i < n; i++) { s = Math.imul(s ^ s >>> 13, 1597334677) >>> 0; r += al[s % al.length]; } return r; };
+  const b58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz', b32 = '023456789acdefghjklmnpqrstuvwxyz';
+  if (net.includes('ERC')) return '0x' + pick('0123456789abcdef', 40);
+  if (net.includes('Tron')) return 'T' + pick(b58, 33);
+  if (net === 'Bitcoin') return 'bc1q' + pick(b32, 38);
+  if (net === 'XRP Ledger') return 'r' + pick(b58, 33);
+  return pick(b58, 44);
+};
+const qrFor = text => {   // decorative only: looks like a QR, encodes nothing
+  let s = hash(text), d = '';
+  const fin = (x, y) => (x < 8 && y < 8) || (x > 20 && y < 8) || (x < 8 && y > 20);
+  for (let y = 0; y < 29; y++) for (let x = 0; x < 29; x++) { s = Math.imul(s ^ s >>> 13, 1597334677) >>> 0; if (!fin(x, y) && s % 100 < 48) d += `M${x} ${y}h1v1h-1z`; }
+  const F = (x, y) => `<path d="M${x} ${y}h7v7h-7z M${x+1} ${y+1}v5h5v-5z" fill-rule="evenodd"/><path d="M${x+2} ${y+2}h3v3h-3z"/>`;
+  return `<svg viewBox="0 0 29 29" shape-rendering="crispEdges" aria-hidden="true"><g fill="#25165b"><path d="${d}"/>${F(0,0)}${F(22,0)}${F(0,22)}</g></svg>`;
+};
+const spark = (seed, up) => { // decorative 30-day line
+  let s = hash(seed), y = 60, pts = [];
+  for (let i = 0; i <= 30; i++) { s = Math.imul(s ^ s >>> 13, 1597334677) >>> 0; y += (s % 100 - (up ? 46 : 54)) / 6; y = Math.max(10, Math.min(110, y)); pts.push([i * 10, 120 - y]); }
+  const l = 'M' + pts.map(p => p.join(' ')).join('L');
+  return `<svg class="chart" viewBox="0 0 300 120" preserveAspectRatio="none" aria-hidden="true"><path class="a" d="${l}L300 120L0 120Z"/><path class="l" d="${l}"/></svg>`;
+};
+
+/* ================= screens ================= */
+const txRow = t => {
+  const h = BY[t.sym], ic = { in:'ri-arrow-down-line', out:'ri-arrow-up-line', swap:'ri-arrow-left-right-line' }[t.dir];
+  const sign = t.dir === 'out' ? '−' : '+';
+  return `<button class="row act" data-tx="${t.id}" style="padding:var(--s3) 0"><div class="ic"><i class="${ic}"></i></div>
+    <div class="m"><div class="nm">${{ in:'Received', out:'Sent', swap:'Swapped to' }[t.dir]} ${t.sym}</div><div class="sm">${t.who}</div></div>
+    <div class="r"><div class="amt mny">${mask(sign + f(t.amt, dp(h)) + ' ' + t.sym)}</div><span class="tag ${t.st}">${t.stx}</span></div></button>`;
+};
+
+const SCREENS = {
+  '/': () => {
+    const big = [...HOLD].sort((a, b) => b.value - a.value);
+    return {
+      hd: `${LOGO}<span class="sp"></span><button class="ib" data-act="scan" aria-label="Scan QR code"><i class="ri-qr-scan-2-line"></i></button><button class="ib" data-act="notes" aria-label="Notifications, 2 new"><i class="ri-notification-3-line"></i><span class="dot"></span></button>`,
+      body: `
+      <section class="card hero">
+        <div class="kh"><button class="wsel" data-act="cur" aria-label="Display currency">${cur} <i class="ri-arrow-down-s-line"></i></button>
+          <button class="eye" data-act="hide" aria-pressed="${hidden}"><i class="${hidden ? 'ri-eye-line' : 'ri-eye-off-line'}"></i>${hidden ? 'Show' : 'Hide'}</button></div>
+        <div class="k" style="margin-top:var(--s4)">Total wallet balance</div>
+        <div class="figure mny">${money(TOTAL)}</div>
+        <div class="eq mny">${hidden ? '≈ ••••' : `≈ ${f(TOTAL / BY.BTC.px, 4)} BTC`}</div>
+        <div class="pnl gain">${mask('HK$ 48,212.40')} · 0.72% today</div>
+        <div class="alloc" role="img" aria-label="Allocation by asset">${big.map(h => `<i style="flex:${h.value};background:${h.col}"></i>`).join('')}</div>
+      </section>
+      <nav class="qa" aria-label="Wallet actions">
+        <button class="blush" data-act="send"><i class="ri-arrow-up-line"></i>Send</button>
+        <button class="mist" data-act="receive"><i class="ri-arrow-down-line"></i>Receive</button>
+        <button class="lilac" data-go="/swap"><i class="ri-arrow-left-right-line"></i>Swap</button>
+        <button class="sand" data-act="transfer"><i class="ri-exchange-funds-line"></i>Transfer</button>
+      </nav>
+      <section class="card">
+        <h3>Assets <a href="#/activity">History</a></h3>
+        ${big.map(h => `<button class="row" data-go="/asset/${h.sym}">${coin(h)}
+          <div class="m"><div class="nm">${h.sym}</div><div class="sm">${h.name} · ${chg(h.chg)}</div></div>
+          <div class="r"><div class="mny">${mask(f(h.amt, dp(h)))}</div><span class="sm mny">${money(h.value)}</span></div></button>`).join('')}
+      </section>
+      <section class="card">
+        <h3>Recent activity <a href="#/activity">See all</a></h3>
+        ${TX.slice(0, 3).map(txRow).join('')}
+      </section>`
+    };
+  },
+
+  '/asset': sym => {
+    const h = BY[sym]; if (!h) return SCREENS['/']();
+    const tx = TX.filter(t => t.sym === sym);
+    return {
+      hd: `<button class="ib bare" data-go="/" aria-label="Back"><i class="ri-arrow-left-line"></i></button><h1>${h.name}</h1>`,
+      body: `
+      <section class="card hero">
+        <div class="kh"><div class="pair">${coin(h, 1)}<div><div class="nm">${h.sym}</div><div class="sm">${h.nets.join(' · ')}</div></div></div></div>
+        <div class="figure mny" style="margin-top:var(--s4)">${mask(f(h.amt, dp(h)) + ' ' + h.sym)}</div>
+        <div class="eq mny">${money(h.value)}</div>
+        <div class="acts2" style="margin-top:var(--s4)">
+          <button class="btn" data-act="send" data-sym="${sym}"><i class="ri-arrow-up-line"></i>Send</button>
+          <button class="btn ghost" data-act="receive" data-sym="${sym}"><i class="ri-arrow-down-line"></i>Receive</button>
+        </div>
+      </section>
+      <section class="card">
+        <h3>Price · 30d</h3>
+        <div class="kh"><b style="font-size:var(--t-h2);font-variant-numeric:tabular-nums">HK$ ${f(h.px, h.px < 50 ? 4 : 2)}</b>${chg(h.chg)}</div>
+        ${spark(sym, h.chg >= 0)}
+        <a class="btn ghost" style="width:100%;margin-top:var(--s3)" href="https://javas-exchange.vercel.app/trade.html" target="_blank" rel="noopener"><i class="ri-exchange-line"></i>Trade on Javas Exchange</a>
+      </section>
+      <section class="card"><h3>Activity</h3>${tx.length ? tx.map(txRow).join('') : '<p class="empty"><i class="ri-inbox-line"></i>No activity yet.</p>'}</section>`
+    };
+  },
+
+  '/activity': () => ({
+    hd: `<h1>Activity</h1><button class="ib" data-act="export" aria-label="Export statement"><i class="ri-download-2-line"></i></button>`,
+    body: `
+      <div class="chips" role="group" aria-label="Filter">${['All','Received','Sent','Swaps','Pending'].map((c, i) => `<button data-f="${c}" aria-pressed="${i === 0}">${c}</button>`).join('')}</div>
+      <section class="card" id="txs"></section>`
+  }),
+
+  '/swap': () => ({
+    hd: `<h1>Swap</h1>`,
+    body: `
+      <section class="card">
+        <h3>Convert between assets</h3>
+        <div class="fl"><label for="sf">You pay <b id="sfb"></b></label>
+          <div class="unit"><input id="sa" class="big-in" inputmode="decimal" autocomplete="off" placeholder="0"><span class="u"><button type="button" id="smax">Max</button><select id="sf" style="width:auto;min-height:32px;font-size:13px"></select></span></div></div>
+        <div class="swapx" style="margin:var(--s3) 0"><button type="button" id="sflip" aria-label="Flip"><i class="ri-arrow-up-down-line"></i></button></div>
+        <div class="fl"><label for="st">You get <b>Estimated</b></label>
+          <div class="unit"><input id="sg" class="big-in" readonly tabindex="-1" placeholder="0"><span class="u"><select id="st" style="width:auto;min-height:32px;font-size:13px"></select></span></div>
+          <p class="err" id="ser" hidden></p></div>
+        <div class="info" style="margin-top:var(--s4)"><div><span>Rate</span><b id="srate"></b></div><div><span>Fee (0.12%)</span><b id="sfee"></b></div><div><span>Quote expires</span><b id="sexp">15s</b></div></div>
+        <button class="btn full" style="margin-top:var(--s4)" id="sgo" disabled>Review swap</button>
+      </section>
+      <p class="warn">Swaps settle against the Javas Exchange order book at the quoted rate. Fee follows your VIP 3 tier.</p>`
+  }),
+
+  '/settings': () => ({
+    hd: `<h1>Settings</h1>`,
+    body: `
+      <section class="card">
+        <div class="pair"><div class="coin lg" style="background:linear-gradient(135deg,var(--flag),var(--signal));color:var(--deep)">WC</div>
+          <div><div class="nm">Wing Chan</div><div class="sm">Corporate · UID 9642943 · Linked to Javas Exchange</div></div></div>
+      </section>
+      <section class="card">
+        <h3>Security</h3>
+        <label class="set"><i class="ri-scan-2-line"></i><span>Face ID unlock</span><input type="checkbox" class="sw" checked></label>
+        <div class="set"><i class="ri-lock-password-line"></i><span>Change PIN</span><button class="link" data-act="soon">Change</button></div>
+        <label class="set"><i class="ri-timer-line"></i><span>Auto-lock<small>Lock after inactivity</small></span><select style="width:auto;min-height:32px;font-size:13px"><option>1 min</option><option selected>5 min</option><option>15 min</option></select></label>
+        <div class="set"><i class="ri-shield-keyhole-line"></i><span>2FA for sends<small>Google Authenticator</small></span><em class="tag ok">On</em></div>
+        <div class="set"><i class="ri-team-line"></i><span>Second approver<small>Required above HK$ 500,000</small></span><em>Mei Lau</em></div>
+        <div class="set"><i class="ri-key-2-line"></i><span>Recovery backup<small>Encrypted with your account key</small></span><button class="link" data-act="soon">View</button></div>
+      </section>
+      <section class="card">
+        <h3>Address book <button class="link" style="margin-left:auto" data-act="soon">Add</button></h3>
+        ${BOOK.map(b => `<div class="set"><i class="ri-${b.addr === 'internal' ? 'building-line' : 'shield-check-line'}"></i><span>${b.name}<small>${b.note}${b.addr === 'internal' ? '' : ' · ' + b.addr}</small></span><em class="tag ok">Whitelisted</em></div>`).join('')}
+        <p class="sm" style="font-size:var(--t-label);color:var(--ink-3);margin-top:var(--s2)">New addresses unlock after a 24-hour hold.</p>
+      </section>
+      <section class="card">
+        <h3>Preferences</h3>
+        <label class="set"><i class="ri-money-dollar-circle-line"></i><span>Display currency</span><select id="pcur" style="width:auto;min-height:32px;font-size:13px">${Object.keys(RATE).map(c => `<option ${c === cur ? 'selected' : ''}>${c}</option>`).join('')}</select></label>
+        <div class="set"><i class="ri-contrast-2-line"></i><span>Theme</span><button class="theme-toggle" type="button" aria-label="Toggle theme" style="width:36px;height:36px"><i class="ri-moon-line"></i><i class="ri-sun-line"></i></button></div>
+        <label class="set"><i class="ri-translate-2"></i><span>Language</span><select style="width:auto;min-height:32px;font-size:13px"><option>English</option><option>繁體中文</option><option>简体中文</option></select></label>
+        <label class="set"><i class="ri-notification-3-line"></i><span>Push notifications</span><input type="checkbox" class="sw" checked></label>
+      </section>
+      <button class="btn ghost full" data-act="lock"><i class="ri-lock-line"></i>Lock wallet</button>`
+  }),
+};
+
+/* ================= router ================= */
+const render = () => {
+  const [, path = '', arg] = location.hash.slice(1).split('/');
+  const key = '/' + path, scr = (SCREENS[key] || SCREENS['/'])(arg);
+  $('#hd').innerHTML = scr.hd;
+  $('#pg').innerHTML = scr.body;
+  $('#app').classList.toggle('masked', hidden);
+  document.querySelectorAll('.tabbar a').forEach(a => a.getAttribute('href') === '#' + (key === '/asset' ? '/' : key) ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+  document.querySelectorAll('.theme-toggle').forEach(b => b.onclick = () => JVXTheme.toggle());
+  if (key === '/activity') initActivity();
+  if (key === '/swap') initSwap();
+  if (key === '/settings') $('#pcur').onchange = e => setCur(e.target.value);
+  scrollTo(0, 0);
+};
+addEventListener('hashchange', render);
+const setCur = c => { cur = c; try { localStorage.setItem('jvx:wcur', c); } catch (e) {} };
+
+function initActivity() {
+  const box = $('#txs');
+  const draw = f => {
+    const m = { All:() => 1, Received:t => t.dir === 'in', Sent:t => t.dir === 'out', Swaps:t => t.dir === 'swap', Pending:t => t.st === 'pend' }[f];
+    const list = TX.filter(m);
+    if (!list.length) { box.innerHTML = '<p class="empty"><i class="ri-inbox-line"></i>Nothing here yet.</p>'; return; }
+    let day = '';
+    box.innerHTML = list.map(t => { const d = t.when.split(' · ')[0]; const hd = d !== day ? `<div class="day">${day = d}</div>` : ''; return hd + txRow(t); }).join('');
+  };
+  document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { document.querySelectorAll('[data-f]').forEach(x => x.setAttribute('aria-pressed', x === b)); draw(b.dataset.f); });
+  draw('All');
+}
+
+function initSwap() {
+  const sf = $('#sf'), st = $('#st'), sa = $('#sa');
+  const opts = HOLD.map(h => `<option>${h.sym}</option>`).join('');
+  sf.innerHTML = st.innerHTML = opts; sf.value = 'USDT'; st.value = 'BTC';
+  let t = 15;
+  const tick = setInterval(() => { if (!$('#sexp')) return clearInterval(tick); t = t <= 1 ? 15 : t - 1; $('#sexp').textContent = t + 's'; }, 1000);
+  const calc = () => {
+    if (sf.value === st.value) st.value = HOLD.find(h => h.sym !== sf.value).sym;
+    const a = BY[sf.value], b = BY[st.value], n = parseFloat(sa.value.replace(/,/g, '')) || 0;
+    const out = n * a.px / b.px * (1 - 0.0012);
+    $('#sfb').textContent = `Balance ${f(a.amt, dp(a))}`;
+    $('#sg').value = n ? f(out, dp(b)) : '';
+    $('#srate').textContent = `1 ${a.sym} ≈ ${f(a.px / b.px, a.px / b.px < 1 ? 6 : 2)} ${b.sym}`;
+    $('#sfee').textContent = `${f(n * 0.0012, dp(a))} ${a.sym}`;
+    const bad = n > a.amt ? `More than your ${a.sym} balance.` : '';
+    $('#ser').textContent = bad; $('#ser').hidden = !bad;
+    $('#sgo').disabled = !n || !!bad;
+    return { a, b, n, out };
+  };
+  sf.onchange = st.onchange = sa.oninput = calc;
+  $('#smax').onclick = () => { sa.value = f(BY[sf.value].amt, dp(BY[sf.value])); calc(); };
+  $('#sflip').onclick = () => { [sf.value, st.value] = [st.value, sf.value]; calc(); };
+  $('#sgo').onclick = () => { const q = calc(); openSheet(`<div class="sh"><h2 id="sh-t">Confirm swap</h2>${X}</div>
+    <div class="info"><div><span>You pay</span><b>${f(q.n, dp(q.a))} ${q.a.sym}</b></div><div><span>You get</span><b>≈ ${f(q.out, dp(q.b))} ${q.b.sym}</b></div><div><span>Slippage limit</span><b>0.5%</b></div></div>
+    <button class="btn full" data-done="Swap complete|${f(q.out, dp(q.b))} ${q.b.sym} is in your wallet.">Swap now</button>`); };
+  calc();
+}
+
+/* ================= sheets ================= */
+const sheet = $('#sheet'), sh = $('#sh');
+const X = `<button class="ib bare" value="x" data-x aria-label="Close"><i class="ri-close-line"></i></button>`;
+const openSheet = html => { sh.innerHTML = `<div class="grab"></div>` + html; if (!sheet.open) sheet.showModal(); };
+sheet.addEventListener('click', e => { if (e.target === sheet || e.target.closest('[data-x]')) sheet.close(); });
+const doneSheet = (title, msg) => openSheet(`<div class="done"><i class="ri-checkbox-circle-fill"></i><b>${title}</b><p>${msg}</p></div><button class="btn full" data-x>Done</button>`);
+const assetSel = (id, sym) => `<select id="${id}">${HOLD.map(h => `<option value="${h.sym}" ${h.sym === sym ? 'selected' : ''}>${h.sym} — ${h.name}</option>`).join('')}</select>`;
+const steps = (n, of = 3) => `<div class="steps" aria-label="Step ${n} of ${of}">${Array.from({ length: of }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div>`;
+
+function receive(sym = 'USDT') {
+  openSheet(`<div class="sh"><h2 id="sh-t">Receive</h2>${X}</div>
+    <div class="acts2"><div class="fl"><label for="ra">Asset</label>${assetSel('ra', sym)}</div><div class="fl"><label for="rn">Network</label><select id="rn"></select></div></div>
+    <div class="qrbox"><div class="qr" id="rq"></div><code class="ad" id="rad"></code>
+      <div class="acts2" style="width:100%"><button class="btn ghost" id="rcp"><i class="ri-file-copy-line"></i>Copy</button><button class="btn ghost" id="rsh"><i class="ri-share-line"></i>Share</button></div></div>
+    <p class="warn" id="rw"></p>`);
+  const ra = $('#ra'), rn = $('#rn');
+  const nets = () => { rn.innerHTML = BY[ra.value].nets.map(n => `<option>${n}</option>`).join(''); fill(); };
+  const fill = () => { const a = addrFor(ra.value, rn.value); $('#rad').textContent = a; $('#rq').innerHTML = qrFor(a); $('#rw').textContent = `Send only ${ra.value} on ${rn.value} to this address. Anything else can't be recovered.`; };
+  ra.onchange = nets; rn.onchange = fill; nets();
+  $('#rcp').onclick = async () => { try { await navigator.clipboard.writeText($('#rad').textContent); toast('Address copied'); } catch (e) { toast('Copy failed'); } };
+  $('#rsh').onclick = () => navigator.share ? navigator.share({ text: $('#rad').textContent }).catch(() => {}) : toast('Sharing not available here');
+}
+
+function send(sym = 'USDT', st = {}) {
+  // step 1: what and where
+  openSheet(`<div class="sh"><h2 id="sh-t">Send</h2>${X}</div>${steps(1)}
+    <div class="acts2"><div class="fl"><label for="sa2">Asset</label>${assetSel('sa2', sym)}</div><div class="fl"><label for="sn">Network</label><select id="sn"></select></div></div>
+    <div class="fl"><label for="sto">To</label><select id="sto"></select></div>
+    <div class="fl"><label for="samt">Amount <b id="sav"></b></label>
+      <div class="unit"><input id="samt" class="big-in" inputmode="decimal" autocomplete="off" placeholder="0" value="${st.amt || ''}"><span class="u"><button type="button" id="smx">Max</button><span id="su"></span></span></div>
+      <p class="err" id="ser2" hidden></p></div>
+    <div class="info"><div><span>Network fee</span><b id="sfe"></b></div><div><span>Recipient gets</span><b id="sge"></b></div></div>
+    <button class="btn full" id="snx" disabled>Continue</button>`);
+  const a = $('#sa2'), n = $('#sn'), to = $('#sto'), amt = $('#samt');
+  const nets = () => { n.innerHTML = BY[a.value].nets.map(x => `<option>${x}</option>`).join(''); dests(); };
+  const dests = () => {
+    to.innerHTML = BOOK.filter(b => (b.sym === '*' || b.sym === a.value) && (b.net === '*' || b.net === n.value)).map(b => `<option>${b.name}${b.addr === 'internal' ? '' : ' ' + b.addr}</option>`).join('')
+      + '<option disabled>Add new addresses in Settings → Address book</option>';
+    calc();
+  };
+  const calc = () => {
+    const h = BY[a.value], v = parseFloat(amt.value.replace(/,/g, '')) || 0, internal = to.value.startsWith('Javas'), fee = internal ? 0 : FEE[h.sym];
+    $('#sav').textContent = `Available ${f(h.amt, dp(h))}`; $('#su').textContent = h.sym;
+    $('#sfe').textContent = internal ? 'Free · internal' : `${f(fee, dp(h))} ${h.sym}`;
+    $('#sge').textContent = `${f(Math.max(0, v - fee), dp(h))} ${h.sym}`;
+    const bad = v > h.amt ? `More than your available ${h.sym}.` : v && v <= fee ? 'Amount must be more than the network fee.' : '';
+    $('#ser2').textContent = bad; $('#ser2').hidden = !bad; $('#snx').disabled = !v || !!bad;
+    return { h, v, fee, to: to.value, net: n.value };
+  };
+  a.onchange = nets; n.onchange = dests; to.onchange = amt.oninput = calc;
+  $('#smx').onclick = () => { amt.value = f(BY[a.value].amt, dp(BY[a.value])); calc(); };
+  $('#snx').onclick = () => review(calc());
+  nets();
+}
+function review(q) {
+  const hkd = q.v * q.h.px, approver = hkd > 500000;
+  openSheet(`<div class="sh"><h2 id="sh-t">Review send</h2>${X}</div>${steps(2)}
+    <div class="info"><div><span>Amount</span><b>${f(q.v, dp(q.h))} ${q.h.sym}</b></div><div><span>Value</span><b>HK$ ${f(hkd)}</b></div>
+      <div><span>To</span><b>${q.to}</b></div><div><span>Network</span><b>${q.net}</b></div><div><span>Fee</span><b>${q.fee ? f(q.fee, dp(q.h)) + ' ' + q.h.sym : 'Free'}</b></div>
+      <div><span>Arrives</span><b>${q.to.startsWith('Javas') ? 'Instantly' : 'Usually within 30 minutes'}</b></div></div>
+    ${approver ? '<p class="warn">Above HK$ 500,000 — Mei Lau will be asked to approve before it is sent.</p>' : ''}
+    <div class="acts2"><button class="btn ghost" id="rbk">Back</button><button class="btn" id="rok">Confirm</button></div>`);
+  $('#rbk').onclick = () => send(q.h.sym, { amt: f(q.v, dp(q.h)) });
+  $('#rok').onclick = () => {
+    openSheet(`<div class="sh"><h2 id="sh-t">Enter 2FA code</h2>${X}</div>${steps(3)}
+      <p style="font-size:13px;color:var(--ink-2)">Open Google Authenticator and enter the 6-digit code for Javas Exchange.</p>
+      <div class="otp" id="otp">${'<input inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit">'.repeat(6)}</div>
+      <p class="sm" style="font-size:var(--t-label);color:var(--ink-3)">Preview: any 6 digits work.</p>`);
+    const ins = [...document.querySelectorAll('#otp input')]; ins[0].focus();
+    ins.forEach((el, i) => {
+      el.oninput = () => { el.value = el.value.replace(/\D/g, ''); if (el.value && ins[i + 1]) ins[i + 1].focus();
+        if (ins.every(x => x.value)) doneSheet(approver ? 'Sent for approval' : 'Send submitted', approver ? `Mei Lau has been notified. You'll see it in Activity once approved.` : `${f(q.v - q.fee, dp(q.h))} ${q.h.sym} is on its way. Track it in Activity.`); };
+      el.onkeydown = e => { if (e.key === 'Backspace' && !el.value && ins[i - 1]) ins[i - 1].focus(); };
+    });
+  };
+}
+function transfer() {
+  // move between this wallet and the user's Javas Exchange spot account
+  openSheet(`<div class="sh"><h2 id="sh-t">Transfer</h2>${X}</div>
+    <div class="seg" role="group" aria-label="Direction"><button data-d="out" aria-pressed="true">Wallet → Exchange</button><button data-d="in" aria-pressed="false">Exchange → Wallet</button></div>
+    <div class="fl"><label for="ta">Asset</label>${assetSel('ta', 'USDT')}</div>
+    <div class="fl"><label for="tam">Amount <b id="tav"></b></label><div class="unit"><input id="tam" class="big-in" inputmode="decimal" placeholder="0"><span class="u"><button type="button" id="tmx">Max</button></span></div></div>
+    <div class="info"><div><span>Fee</span><b>Free</b></div><div><span>Arrives</span><b>Instantly</b></div></div>
+    <button class="btn full" data-done="Transfer complete|Your balances on both sides are updated.">Transfer</button>`);
+  const EX = { USDT:52140, BTC:0.412, ETH:3.1, USDC:8000, SOL:12, XRP:900, LINK:0 }; // spot balances on the exchange
+  let d = 'out';
+  const av = () => { const h = BY[$('#ta').value], v = d === 'out' ? h.amt : EX[h.sym]; $('#tav').textContent = `Available ${f(v, dp(h))}`; return v; };
+  document.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { d = b.dataset.d; document.querySelectorAll('[data-d]').forEach(x => x.setAttribute('aria-pressed', x === b)); av(); });
+  $('#ta').onchange = av; $('#tmx').onclick = () => { $('#tam').value = f(av(), dp(BY[$('#ta').value])); }; av();
+}
+function txDetail(t) {
+  const h = BY[t.sym];
+  openSheet(`<div class="sh"><h2 id="sh-t">${{ in:'Received', out:'Sent', swap:'Swapped to' }[t.dir]} ${t.sym}</h2>${X}</div>
+    <div class="pair">${coin(h, 1)}<div><div class="figure" style="font-size:26px;margin:0">${t.dir === 'out' ? '−' : '+'}${f(t.amt, dp(h))} ${t.sym}</div><div class="sm">≈ HK$ ${f(t.amt * h.px)}</div></div></div>
+    <div class="info"><div><span>Status</span><b><span class="tag ${t.st}">${t.stx}</span></b></div><div><span>${t.dir === 'in' ? 'From' : 'To'}</span><b>${t.who.replace(/^(From|To) /, '')}</b></div>
+      <div><span>Time</span><b>${t.when} HKT</b></div><div><span>Network</span><b>${h.nets[0]}</b></div><div><span>Tx hash</span><b style="font-family:var(--mono);font-size:12px">${addrFor('tx' + t.id, 'Ethereum (ERC-20)').slice(0, 18)}…</b></div></div>
+    <div class="acts2"><button class="btn ghost" data-act="soon"><i class="ri-external-link-line"></i>Explorer</button><button class="btn ghost" data-act="soon"><i class="ri-customer-service-2-line"></i>Get help</button></div>`);
+}
+
+/* ================= global clicks ================= */
+document.addEventListener('click', e => {
+  const go = e.target.closest('[data-go]'); if (go) { location.hash = '#' + go.dataset.go; return; }
+  const dn = e.target.closest('[data-done]'); if (dn) { const [t, m] = dn.dataset.done.split('|'); doneSheet(t, m); return; }
+  const tx = e.target.closest('[data-tx]'); if (tx) return txDetail(TX[tx.dataset.tx]);
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act;
+  if (a === 'send') send(b.dataset.sym);
+  else if (a === 'receive') receive(b.dataset.sym);
+  else if (a === 'transfer') transfer();
+  else if (a === 'hide') { hidden = !hidden; try { localStorage.setItem('jvx:hide', hidden ? '1' : '0'); } catch (x) {} render(); }
+  else if (a === 'cur') { const k = Object.keys(RATE); setCur(k[(k.indexOf(cur) + 1) % k.length]); render(); }
+  else if (a === 'lock') lock();
+  else if (a === 'notes') openSheet(`<div class="sh"><h2 id="sh-t">Notifications</h2>${X}</div>
+      <div class="act"><div class="ic"><i class="ri-arrow-up-line"></i></div><div class="m"><div class="t">BTC send confirming</div><div class="s">0.25 BTC to Fireblocks vault · 2/3 confirmations</div></div></div>
+      <div class="act"><div class="ic"><i class="ri-shield-check-line"></i></div><div class="m"><div class="t">Address whitelisted</div><div class="s">OTC settlement ••Q7xk is now usable</div></div></div>`);
+  else toast(a === 'scan' ? 'Camera opens here on device' : a === 'export' ? 'Statement export — coming with the API' : 'Coming soon');
+});
+
+/* ================= lock ================= */
+let pin = '';
+const lock = () => { pin = ''; dots(); $('#lock').hidden = false; };
+const dots = () => document.querySelectorAll('#pins i').forEach((d, i) => d.classList.toggle('on', i < pin.length));
+const unlock = () => { $('#lock').hidden = true; render(); };
+const key = k => {
+  if (k === 'del') pin = pin.slice(0, -1);
+  else if (k === 'bio') return unlock();   // ponytail: real Face ID comes from the native shell (WebAuthn / LocalAuthentication)
+  else if (pin.length < 6) pin += k;
+  dots();
+  if (pin.length === 6) setTimeout(unlock, 160);
+};
+$('#pad').onclick = e => { const b = e.target.closest('button'); if (b) key(b.dataset.k || b.textContent.trim()); };
+addEventListener('keydown', e => { if ($('#lock').hidden) return; if (/^\d$/.test(e.key)) key(e.key); else if (e.key === 'Backspace') key('del'); });
+render();
+</script>
+</body>
+</html>
