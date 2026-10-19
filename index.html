@@ -23,8 +23,13 @@
    ledger rules as the web and mobile apps. Mobile-first: one
    column, bottom tab bar, sheets instead of dialogs.
    ============================================================ */
-body{display:block;background:var(--canvas)}            /* app.css lays out a sidebar grid; the wallet has none */
-.app{max-width:460px;min-height:100dvh;margin:0 auto;background:var(--canvas);display:flex;flex-direction:column;
+body{display:block;background:var(--stage)}
+/* the phone column on a wider screen — same as the exchange mobile app: a 430px canvas
+   strip on a lilac-grey stage, lifted by a soft purple halo */
+:root{--stage:#e9e6ee;--halo:0 0 0 1px var(--rule-soft),0 0 90px -10px rgba(37,22,91,.22)}
+:root[data-theme="dark"]{--stage:#0c0a10;--halo:0 0 0 1px var(--rule),0 0 90px -10px rgba(155,134,216,.18)}
+.app,.gate,.splash{box-shadow:var(--halo)}            /* app.css lays out a sidebar grid; the wallet has none */
+.app{max-width:430px;min-height:100dvh;margin:0 auto;background:var(--canvas);display:flex;flex-direction:column;
   border-inline:1px solid var(--rule-soft);padding-bottom:calc(72px + env(safe-area-inset-bottom))}
 
 /* header */
@@ -89,7 +94,7 @@ body{display:block;background:var(--canvas)}            /* app.css lays out a si
 .coin.lg{width:44px;height:44px;font-size:18px}
 
 /* sheets — bottom drawers, the mobile counterpart of the web dialog */
-.sheet{border:0;padding:0;margin:auto auto 0;width:min(460px,100vw);max-width:100vw;max-height:92dvh;
+.sheet{border:0;padding:0;margin:auto auto 0;width:min(430px,100vw);max-width:100vw;max-height:92dvh;
   background:var(--sheet-raised);color:var(--ink);border-top:1px solid var(--rule-strong)}
 .sheet::backdrop{background:rgba(20,13,36,.45)}
 .sheet[open]{animation:up .28s var(--ease)}
@@ -130,26 +135,197 @@ code.ad{display:block;width:100%;font-family:var(--mono);font-size:12px;word-bre
 .done b{font-size:var(--t-h3)}
 .done p{color:var(--ink-3);font-size:13px;max-width:30ch}
 
-/* lock screen */
-.lock{position:fixed;inset:0;z-index:20;background:var(--rail);color:#fff;display:grid;place-items:center;padding:var(--s6)}
-.lock .wrap{width:min(320px,100%);display:grid;justify-items:center;gap:var(--s5);text-align:center}
-.lock svg.mark{height:64px}
-.lock .wm{font-size:15px;font-weight:600;letter-spacing:.2em;text-transform:uppercase}
-.lock .wm span{font-weight:400;opacity:.55}
-.lock p{font-size:13px;color:rgba(255,255,255,.6)}
-.pins{display:flex;gap:14px}
-.pins i{width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,.5)}
-.pins i.on{background:var(--signal);border-color:var(--signal)}
-.pins.shake{animation:sh .3s}
+/* ============================================================
+   Gate screens — splash, first-run setup, lock. Drawn straight from
+   the exchange mobile login: light canvas with ruled columns, the
+   spaced wordmark, white labelled inputs, deep-purple segmented
+   control, coral cut-corner CTA in mono caps, ruled keypad.
+   ============================================================ */
+.gate{position:fixed;top:0;bottom:0;left:50%;width:min(430px,100%);translate:-50% 0;z-index:20;overflow:auto;
+  background:var(--canvas);
+  background-image:repeating-linear-gradient(90deg,transparent 0 calc(33.333% - 1px),var(--rule) calc(33.333% - 1px) 33.333%)}
+.onb{z-index:25}
+.gate .wrap{min-height:100dvh;padding:var(--s4) var(--s5) calc(var(--s6) + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:var(--s4)}
+.gate .grow{flex:1}
+/* text that crosses a column rule gets the canvas behind it, as on the web app's header */
+.gate h2,.gate .sub,.gate .brand .wm,.gate .brand p,.gate .fine,.gate .or span,.gate .row2 > *{background:var(--canvas)}
+
+.gbar{display:flex;align-items:center;gap:var(--s3);min-height:40px}
+.gbar .lbl{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);background:var(--canvas);padding-right:6px}
+.gbar .lbl::before{content:"";width:8px;height:8px;flex:none;background:var(--signal)}
+.gbar .sp{flex:1}
+.gbar .back{width:40px;height:40px;margin-left:-10px;border:0;background:none;color:var(--ink);font-size:20px;display:grid;place-items:center;cursor:pointer}
+.chip{display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:0 10px;border:1px solid var(--rule-strong);background:var(--sheet);
+  color:var(--ink);font:inherit;font-size:13px;font-weight:600;cursor:pointer;border-radius:var(--r-sm)}
+.chip.mono{font-family:var(--mono);font-weight:500;font-size:11.5px;letter-spacing:.06em}
+.gate .steps i{height:2px;background:var(--rule-strong)}
+.gate .steps i.on{background:var(--signal)}
+
+.brand{display:grid;justify-items:center;gap:12px;text-align:center}
+.brand svg{height:76px}
+.brand .wm{font-size:22px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);padding:0 6px}
+.brand .wm span{font-weight:300}
+.brand p{font-size:15px;color:var(--ink-2);padding:0 6px}
+.gate h2{font-size:26px;font-weight:600;letter-spacing:-.02em;justify-self:start;width:fit-content}
+.gate .sub{font-size:14px;color:var(--ink-2);line-height:1.55;margin-top:6px;width:fit-content}
+
+/* CTA — the exchange's SIGN IN button */
+.cta{width:100%;min-height:52px;background:var(--signal);color:#fff;font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.22em;text-transform:uppercase}
+.cta:hover{background:color-mix(in srgb,var(--signal) 88%,#000)}
+.cta[disabled]{opacity:.5}
+.btn.ghost.tall{width:100%;min-height:52px;background:var(--sheet);font-weight:600}
+
+.gate label{color:var(--ink);font-weight:600;font-size:13px;margin-bottom:6px}
+.gate label .req{color:var(--signal)}
+.gate input{background:var(--sheet);min-height:52px;font-size:15px}
+.pw{position:relative}.pw input{padding-right:48px}
+.pw button{position:absolute;right:6px;top:50%;translate:0 -50%;width:40px;height:40px;border:0;background:none;color:var(--ink-3);font-size:18px;cursor:pointer}
+.gate .err{color:var(--loss)}
+.row2{display:flex;align-items:center;justify-content:space-between;font-size:14px}
+.row2 label{display:flex;align-items:center;gap:10px;margin:0;font-weight:400;font-size:14px;cursor:pointer}
+.row2 input[type=checkbox]{width:22px;height:22px;min-height:0;margin:0;accent-color:var(--deep)}
+.row2 a,.gate .link{color:var(--signal);font-weight:600;font-size:14px}
+.or{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:500;color:var(--ink-3)}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--rule)}
+.soc{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+.gseg{display:grid;grid-template-columns:1fr 1fr;padding:4px;border:1px solid var(--rule);background:var(--sheet)}
+.gseg button{min-height:44px;border:0;background:none;font:inherit;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer}
+.gseg button[aria-pressed=true]{background:var(--deep);color:#fff}
+.fine{font-size:var(--t-label);color:var(--ink-3);text-align:center;line-height:1.5;justify-self:center;padding:0 6px}
+
+/* welcome: three ruled feature rows with pastel badges */
+.feat{display:grid;gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.feat div{display:flex;gap:var(--s3);align-items:center;padding:14px var(--s4);background:var(--sheet)}
+.feat i{width:40px;height:40px;flex:none;display:grid;place-items:center;font-size:20px;color:var(--deep);background:var(--tone)}
+.feat b{display:block;font-size:14px;font-weight:600}
+.feat small{display:block;font-size:var(--t-label);color:var(--ink-3)}
+.feat em{margin-left:auto;font-style:normal;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--ink-4)}
+
+/* account found / summary — the lilac hero card */
+.gate .hero{padding:var(--s5)}
+.gate .hero .pair .coin{background:linear-gradient(135deg,var(--flag),var(--signal));color:var(--deep)}
+.gate .hero .quad{margin-top:var(--s4)}
+/* stat quad, from the web dashboard */
+.quad{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule-soft);border:1px solid var(--rule-soft)}
+.quad > div{background:var(--sheet);padding:var(--s3) var(--s4)}
+.quad .v{font-size:var(--t-h4);font-weight:600;margin-top:2px}
+
+/* PIN: six ledger cells, ruled keypad */
+.cells{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.cells i{aspect-ratio:1/1.15;display:grid;place-items:center;border:1px solid var(--rule-strong);background:var(--sheet);transition:border-color .14s var(--ease)}
+.cells i.on::after{content:"";width:10px;height:10px;background:var(--deep)}
+:root[data-theme="dark"] .cells i.on::after{background:var(--signal)}
+.cells i.cur{border-color:var(--signal);box-shadow:0 0 0 3px var(--ring)}
+.cells.shake{animation:sh .3s}
+.cells.bad i{border-color:var(--loss)}
 @keyframes sh{25%{translate:-6px}75%{translate:6px}}
-.pad{display:grid;grid-template-columns:repeat(3,72px);gap:12px}
-.pad button{height:56px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#fff;font:inherit;font-size:22px;cursor:pointer;border-radius:var(--r)}
-.pad button:hover{background:rgba(255,255,255,.11)}
-.pad button.ghost{border-color:transparent;background:none;font-size:20px}
-.lock .hint{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.keys button{min-height:52px;border:0;background:var(--sheet);color:var(--ink);font:inherit;font-size:24px;font-weight:500;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;transition:background .1s}
+.keys button small{font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--ink-3);height:11px}
+.keys button:hover{background:var(--tint)}
+.keys button:active{background:var(--hero)}
+.keys .fn{font-size:22px;color:var(--ink-2)}
+.keys .fn.on{color:var(--signal)}
+.keys span{background:var(--sheet)}
+/* PIN setup: cells in the lilac card, live rules below */
+.pinc{display:grid;gap:var(--s3);padding:var(--s4) var(--s5)}
+.pinc .cells i{aspect-ratio:1}
+.pinc .pmsg{min-height:0;font-size:12px}
+.pinc .cells i{background:var(--sheet)}
+.rules{padding:var(--s4) var(--s5)}
+.rules h3{margin-bottom:var(--s2)}
+.rules .rule{display:flex;align-items:center;gap:10px;padding:5px 0;border-top:1px solid var(--rule-soft);font-size:14px;color:var(--ink-3)}
+.rules .rule:first-of-type{border-top:0}
+.rules .rule i{font-size:16px}
+.rules .rule.ok{color:var(--ink)}
+.rules .rule.ok i{color:var(--gain)}
+.rules .rule.no i{color:var(--loss)}
+.rules .foot{display:flex;align-items:center;gap:8px;margin-top:var(--s2);padding-top:var(--s3);border-top:1px solid var(--rule-soft);
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.keys button:focus-visible{outline-offset:-3px;border-radius:0}
+/* recovery kit: numbered groups under a veil until revealed */
+.rkit{position:relative;border:1px solid var(--rule);background:var(--sheet)}
+.rkit ol{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule-soft);list-style:none;counter-reset:g}
+.rkit li{counter-increment:g;display:flex;align-items:baseline;gap:10px;padding:12px 14px;background:var(--sheet);font-family:var(--mono);font-size:18px;letter-spacing:.14em}
+.rkit li::before{content:counter(g,decimal-leading-zero);font-size:10.5px;letter-spacing:.08em;color:var(--ink-3)}
+.rkit[data-hidden="1"] ol{filter:blur(7px);user-select:none}
+.rveil{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:0;cursor:pointer;
+  background:color-mix(in srgb,var(--hero) 70%,transparent);color:var(--deep);font:inherit;font-weight:600;font-size:15px}
+:root[data-theme="dark"] .rveil{color:var(--ink)}
+.rveil i{font-size:22px}
+.rveil small{font-weight:400;font-size:12px;color:var(--ink-2)}
+.rkit[data-hidden="1"] .rveil{display:flex}
+/* QR scanner — dark full-column view; the viewfinder is the brand's corner brackets */
+.scan{position:fixed;top:0;bottom:0;left:50%;width:min(430px,100%);translate:-50% 0;z-index:35;background:#0c0a10;color:#fff;overflow:hidden}
+.scan video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.scan .shade{position:absolute;inset:0;display:flex;flex-direction:column;padding:var(--s4) var(--s5) calc(var(--s6) + env(safe-area-inset-bottom));gap:var(--s4)}
+.scan .top{display:flex;align-items:center;gap:var(--s3)}
+.scan .top .lbl{flex:1;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+.scan .top .lbl::before{content:"";width:8px;height:8px;background:var(--signal)}
+.scan .ib{border-color:rgba(255,255,255,.22);color:#fff;background:rgba(0,0,0,.25)}
+.scan .ib:hover{background:rgba(255,255,255,.1);color:#fff}
+.vf{position:relative;width:min(260px,70vw);aspect-ratio:1;margin:auto;box-shadow:0 0 0 100vmax rgba(12,10,16,.55)}
+.scan.nocam .vf{box-shadow:none;border:1px dashed rgba(255,255,255,.18)}
+.vf::before{content:"";position:absolute;inset:0;--b:#fff;background-repeat:no-repeat;background-image:
+  linear-gradient(var(--b),var(--b)),linear-gradient(var(--b),var(--b)),linear-gradient(var(--b),var(--b)),linear-gradient(var(--b),var(--b)),
+  linear-gradient(var(--b),var(--b)),linear-gradient(var(--b),var(--b)),linear-gradient(var(--b),var(--b)),linear-gradient(var(--b),var(--b));
+  background-size:28px 3px,3px 28px,28px 3px,3px 28px,28px 3px,3px 28px,28px 3px,3px 28px;
+  background-position:0 0,0 0,100% 0,100% 0,0 100%,0 100%,100% 100%,100% 100%}
+.vf i.line{position:absolute;left:10px;right:10px;height:2px;background:var(--signal);box-shadow:0 0 12px var(--signal);animation:sl 2.2s ease-in-out infinite alternate}
+@keyframes sl{from{top:10%}to{top:88%}}
+.scan.nocam .vf i.line{display:none}
+.vf .msg{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:8px;text-align:center;padding:var(--s4);color:rgba(255,255,255,.75);font-size:13px}
+.vf .msg i{font-size:32px;color:rgba(255,255,255,.5)}
+.scan .hint{text-align:center;font-size:14px;color:rgba(255,255,255,.8)}
+.scan .acts2 .btn.ghost{color:#fff;border-color:rgba(255,255,255,.22);background:rgba(0,0,0,.25)}
+.scan .acts2 .btn.ghost:hover{background:rgba(255,255,255,.1)}
+.scan .sample{border:0;background:none;color:rgba(255,255,255,.5);font:inherit;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;justify-self:center}
+/* empty / offline / error states */
+.offbar{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--sheet);border:1px solid var(--rule);border-left:3px solid var(--flag);font-size:13px;color:var(--ink-2)}
+.offbar i{font-size:16px;color:var(--ink-3)}
+.offbar b{color:var(--ink);font-weight:600}
+.qa button[aria-disabled=true]{opacity:.4;cursor:not-allowed;transform:none}
+.state{display:grid;justify-items:center;gap:var(--s3);text-align:center;padding:var(--s8) var(--s5)}
+.state .tile{width:72px;height:72px;display:grid;place-items:center;font-size:32px;color:var(--deep);background:var(--tone,#e5e1ea)}
+:root[data-theme="dark"] .state .tile{opacity:.92}
+.state b{font-size:var(--t-h3);font-weight:600}
+.state p{font-size:14px;color:var(--ink-2);max-width:30ch;line-height:1.55}
+.state .btn{min-width:160px}
+.state .meta{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.fund .row{padding:14px 0}
+.fund .row i.n{width:40px;height:40px;flex:none;display:grid;place-items:center;font-size:20px;color:var(--deep);background:var(--tone)}
+.sk{display:block;background:linear-gradient(90deg,var(--sheet-sunk) 0 40%,var(--tint) 50%,var(--sheet-sunk) 60% 100%);background-size:250% 100%;animation:sk 1.1s linear infinite}
+@keyframes sk{from{background-position:100% 0}to{background-position:-150% 0}}
+.pmsg{min-height:20px;font-size:13px;text-align:center;color:var(--ink-3)}
+.pmsg.err{color:var(--loss)}
+
+/* lock header */
+.who2{display:grid;justify-items:center;gap:8px;text-align:center}
+.who2 .coin{width:64px;height:64px;font-size:20px;background:linear-gradient(135deg,var(--flag),var(--signal));color:var(--deep)}
+.who2 h2{justify-self:center}
+.who2 .meta{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);background:var(--canvas);padding:0 6px}
+
+/* Face ID card */
+.bio{display:grid;justify-items:center;gap:var(--s3);text-align:center;padding:var(--s8) var(--s5)}
+.bio .tile{width:96px;height:96px;display:grid;place-items:center;font-size:48px;color:var(--deep);background:#ded6f0}
+.bio b{font-size:var(--t-h4)}
+.bio small{font-size:13px;color:var(--ink-3);max-width:28ch}
+
+/* splash — the exchange's dark radial glow */
+.splash{position:fixed;top:0;bottom:0;left:50%;width:min(430px,100%);translate:-50% 0;z-index:40;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 46%,rgba(232,88,95,.32),rgba(129,34,106,.22) 26%,rgba(37,22,91,.12) 46%,transparent 64%),#141019;
+  transition:opacity .45s var(--ease)}
+.splash.out{opacity:0;pointer-events:none}
+.splash .brand .wm{color:#fff;background:none;font-size:24px}
+.splash .brand p{color:rgba(255,255,255,.5);background:none}
+.splash .brand svg{height:96px}
+.splash .load{position:absolute;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;translate:-50% 0;width:120px;height:2px;background:rgba(255,255,255,.08);overflow:hidden}
+.splash .load::after{content:"";display:block;height:100%;background:var(--signal);animation:ld 1.2s var(--ease) forwards}
+@keyframes ld{from{width:0}to{width:100%}}
 
 /* tab bar */
-.tabbar{position:fixed;bottom:0;left:50%;translate:-50% 0;width:min(460px,100%);z-index:6;display:grid;grid-template-columns:repeat(4,1fr);
+.tabbar{position:fixed;bottom:0;left:50%;translate:-50% 0;width:min(430px,100%);z-index:6;display:grid;grid-template-columns:repeat(4,1fr);
   background:var(--sheet);border-top:1px solid var(--rule);padding-bottom:env(safe-area-inset-bottom)}
 .tabbar a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0 9px;font-size:11px;font-weight:500;color:var(--ink-3);position:relative}
 .tabbar a i{font-size:20px}
@@ -183,33 +359,25 @@ code.ad{display:block;width:100%;font-family:var(--mono);font-size:12px;word-bre
 .chart{width:100%;height:120px;display:block}
 .chart path.l{fill:none;stroke:var(--signal);stroke-width:1.6}
 .chart path.a{fill:var(--signal);opacity:.08}
-.toast{position:fixed;left:50%;bottom:90px;translate:-50% 0;z-index:30;background:var(--ink);color:var(--canvas);font-size:13px;padding:10px 14px;border-radius:var(--r)}
+.toast{position:fixed;left:50%;bottom:90px;translate:-50% 0;z-index:50;background:var(--ink);color:var(--canvas);font-size:13px;padding:10px 14px;border-radius:var(--r)}
 .masked .mny{letter-spacing:.1em}
 </style>
 </head>
 <body>
 
-<!-- ================= lock ================= -->
-<div class="lock" id="lock">
-  <div class="wrap">
-    <svg class="mark" viewBox="0 0 224.34 303.37" aria-hidden="true"><use href="#jx"/></svg>
-    <div class="wm">Javas <span>Wallet</span></div>
-    <p>Enter your 6-digit PIN</p>
-    <div class="pins" id="pins" aria-live="polite"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-    <div class="pad" id="pad">
-      <button>1</button><button>2</button><button>3</button><button>4</button><button>5</button><button>6</button>
-      <button>7</button><button>8</button><button>9</button>
-      <button class="ghost" data-k="bio" aria-label="Unlock with Face ID"><i class="ri-scan-2-line"></i></button><button>0</button>
-      <button class="ghost" data-k="del" aria-label="Delete digit"><i class="ri-delete-back-2-line"></i></button>
-    </div>
-    <div class="hint">Preview · any 6 digits unlock</div>
-  </div>
+<!-- ================= splash + lock (drawn by the gate script) ================= -->
+<div class="splash" id="splash" aria-hidden="true">
+  <div class="brand"><svg viewBox="0 0 224.34 303.37"><use href="#jx"/></svg><div class="wm">Javas <span>Wallet</span></div><p>The stablecoin desk for Hong Kong.</p></div>
+  <div class="load"></div>
 </div>
+<div class="gate lock" id="lock" hidden></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <linearGradient id="jx2a" x1="0" y1="209.8" x2="224.34" y2="209.8" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#dd3b8c"/><stop offset=".14" stop-color="#b6307e"/><stop offset=".35" stop-color="#81226a"/><stop offset=".56" stop-color="#56165b"/><stop offset=".74" stop-color="#380e50"/><stop offset=".89" stop-color="#250949"/><stop offset="1" stop-color="#1f0847"/></linearGradient><linearGradient id="jx2b" x1="112.17" y1="68.39" x2="112.17" y2="240.23" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#dd3b8c"/><stop offset=".14" stop-color="#b6307e"/><stop offset=".35" stop-color="#81226a"/><stop offset=".56" stop-color="#56165b"/><stop offset=".74" stop-color="#380e50"/><stop offset=".89" stop-color="#250949"/><stop offset="1" stop-color="#1f0847"/></linearGradient><linearGradient id="jx2c" x1="140.21" y1="-89.55" x2="140.21" y2="262.61" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ff9700"/><stop offset="1" stop-color="#dd3b8c"/></linearGradient>
   <g id="jx"><path fill="url(#jx2a)" d="M112.17,201.81v-7.780c0-42.96-50.22-77.79-112.17-77.79v109.34c0,42.96,50.22,77.79,112.17,77.79s112.17-34.83,112.17-77.79-50.22-23.77-112.17-23.77Z"/><path fill="url(#jx2b)" d="M112.17,252.59v7.78c39.15,0,73.6-13.09,93.67,8,11.68-12.28,18.5-26.97,18.5-42.78,0-42.96-50.22-23.77-112.17-23.77v-7.78c0-42.96-50.22-77.79-112.17-77.79v58.56c61.950,0,112.17,34.83,112.17,77.79Z"/><path fill="url(#jx2c)" d="M224.34,0c-61.95,0-112.17,34.83-112.17,77.79v147.79c0,28.79-22.57,53.9-56.08,67.35,16.5,6.62,35.65,10.43,56.08,10.43,61.95,0,112.17-34.83,112.17-77.79V0h0Z"/></g>
 </defs></svg>
+
+<div class="gate onb" id="onb" hidden><div class="wrap"></div></div>
 
 <div class="app" id="app">
   <header class="hd" id="hd"></header>
@@ -223,6 +391,7 @@ code.ad{display:block;width:100%;font-family:var(--mono);font-size:12px;word-bre
   <a href="#/settings"><i class="ri-settings-3-line"></i>Settings</a>
 </nav>
 
+<div class="scan" id="scan" hidden role="dialog" aria-modal="true" aria-label="Scan QR code"></div>
 <dialog class="sheet" id="sheet" aria-labelledby="sh-t"><div class="in" id="sh"></div></dialog>
 
 <script>
@@ -256,6 +425,7 @@ const TX = [
 ].map(([dir,sym,amt,who,when,st,stx],i) => ({id:i,dir,sym,amt,who,when,st,stx}));
 
 const $ = s => document.querySelector(s);
+const esc = v => String(v).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
 const dp = h => h.px < 50 ? 2 : 4;
 const f = (v, d = 2) => v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
 const TOTAL = HOLD.reduce((t, h) => t + h.value, 0);
@@ -397,15 +567,17 @@ const SCREENS = {
       <section class="card">
         <h3>Security</h3>
         <label class="set"><i class="ri-scan-2-line"></i><span>Face ID unlock</span><input type="checkbox" class="sw" checked></label>
-        <div class="set"><i class="ri-lock-password-line"></i><span>Change PIN</span><button class="link" data-act="soon">Change</button></div>
+        <div class="set"><i class="ri-lock-password-line"></i><span>Change PIN</span><button class="link" data-act="changepin">Change</button></div>
         <label class="set"><i class="ri-timer-line"></i><span>Auto-lock<small>Lock after inactivity</small></span><select style="width:auto;min-height:32px;font-size:13px"><option>1 min</option><option selected>5 min</option><option>15 min</option></select></label>
         <div class="set"><i class="ri-shield-keyhole-line"></i><span>2FA for sends<small>Google Authenticator</small></span><em class="tag ok">On</em></div>
         <div class="set"><i class="ri-team-line"></i><span>Second approver<small>Required above HK$ 500,000</small></span><em>Mei Lau</em></div>
-        <div class="set"><i class="ri-key-2-line"></i><span>Recovery backup<small>Encrypted with your account key</small></span><button class="link" data-act="soon">View</button></div>
+        <div class="set"><i class="ri-key-2-line"></i><span>Recovery backup<small>${BACKUP.verified ? 'Verified ' + when(BACKUP.verified) : 'Not verified yet'}</small></span>${BACKUP.verified ? '' : '<em class="tag pend" style="margin-right:8px">Check</em>'}<button class="link" data-act="backup">View</button></div>
       </section>
       <section class="card">
-        <h3>Address book <button class="link" style="margin-left:auto" data-act="soon">Add</button></h3>
-        ${BOOK.map(b => `<div class="set"><i class="ri-${b.addr === 'internal' ? 'building-line' : 'shield-check-line'}"></i><span>${b.name}<small>${b.note}${b.addr === 'internal' ? '' : ' · ' + b.addr}</small></span><em class="tag ok">Whitelisted</em></div>`).join('')}
+        <h3>Address book <button class="link" style="margin-left:auto" data-act="addaddr">Add</button></h3>
+        ${BOOK.map(b => { const held = b.until > Date.now();
+          return `<div class="set"><i class="ri-${b.addr === 'internal' ? 'building-line' : held ? 'time-line' : 'shield-check-line'}"></i><span>${esc(b.name)}<small>${esc(b.note)}${b.addr === 'internal' ? '' : ' · ' + esc(b.addr)}</small></span>${held
+            ? `<em class="tag pend" title="Usable from ${when(b.until)} HKT">Hold · ${Math.ceil((b.until - Date.now()) / 3600e3)}h</em>` : '<em class="tag ok">Whitelisted</em>'}</div>`; }).join('')}
         <p class="sm" style="font-size:var(--t-label);color:var(--ink-3);margin-top:var(--s2)">New addresses unlock after a 24-hour hold.</p>
       </section>
       <section class="card">
@@ -415,21 +587,83 @@ const SCREENS = {
         <label class="set"><i class="ri-translate-2"></i><span>Language</span><select style="width:auto;min-height:32px;font-size:13px"><option>English</option><option>繁體中文</option><option>简体中文</option></select></label>
         <label class="set"><i class="ri-notification-3-line"></i><span>Push notifications</span><input type="checkbox" class="sw" checked></label>
       </section>
-      <button class="btn ghost full" data-act="lock"><i class="ri-lock-line"></i>Lock wallet</button>`
+      <section class="card">
+        <h3>Preview state <span class="tag pend" style="margin-left:auto">Review only</span></h3>
+        <div class="seg" role="group" aria-label="Preview state">${[['normal', 'Normal'], ['empty', 'New'], ['offline', 'Offline'], ['error', 'Error']].map(([k, l]) => `<button data-demo="${k}" aria-pressed="${DEMO === k}">${l}</button>`).join('')}</div>
+        <p class="sm" style="font-size:var(--t-label);color:var(--ink-3);margin-top:var(--s2)">Shows how Wallet, Activity and Swap look in each state. Not part of the app.</p>
+      </section>
+      <button class="btn ghost full" data-act="lock"><i class="ri-lock-line"></i>Lock wallet</button>
+      <button class="btn ghost full" data-act="onboard"><i class="ri-restart-line"></i>Replay first-run setup (preview)</button>`
   }),
 };
+
+/* ================= states: empty / offline / error =================
+   DEMO is the preview switch in Settings; real offline comes from the browser.
+   ponytail: 'empty' and 'error' are driven by the balances API response once wired. */
+let DEMO = 'normal';
+let netDown = !navigator.onLine;
+let SYNC = '';   // time of the last good sync; set on first render (hkt() is defined further down)
+const isOffline = () => netDown || DEMO === 'offline';
+addEventListener('online', () => { netDown = false; render(); toast('Back online'); });
+addEventListener('offline', () => { netDown = true; render(); });
+const NEEDS_NET = ['send', 'transfer', 'addaddr', 'backup', 'export', 'changepin', 'swapgo'];
+const OFFBAR = () => `<div class="offbar" role="status"><i class="ri-wifi-off-line"></i><span><b>You're offline.</b> Balances as of ${SYNC || (SYNC = hkt())}.</span></div>`;
+const ERROR_BODY = () => `<section class="card state">
+    <div class="tile" style="--tone:#f7dcd9"><i class="ri-cloud-off-line"></i></div>
+    <b>Can't load your wallet</b>
+    <p>Javas is having trouble right now. Your funds are safe — nothing has moved.</p>
+    <button class="btn" data-act="retry"><i class="ri-refresh-line"></i>Try again</button>
+    <span class="meta">Error JVX-503 · ${hkt()}</span>
+  </section>
+  <p class="fine" style="text-align:center;font-size:var(--t-label);color:var(--ink-3)">Still stuck? <a href="#" data-act="soon">Check service status</a></p>`;
+const SKELETON = `<section class="card hero"><span class="sk" style="width:40%;height:12px"></span><span class="sk" style="width:75%;height:34px;margin-top:14px"></span><span class="sk" style="width:30%;height:12px;margin-top:10px"></span></section>
+  <div class="qa">${'<span class="sk" style="height:76px"></span>'.repeat(4)}</div>
+  <section class="card">${'<div style="display:flex;gap:12px;align-items:center;padding:12px 0"><span class="sk" style="width:28px;height:28px;border-radius:50%"></span><span class="sk" style="flex:1;height:14px"></span><span class="sk" style="width:70px;height:14px"></span></div>'.repeat(4)}</section>`;
+const EMPTY_HOME = () => `
+  <section class="card hero">
+    <div class="kh"><button class="wsel" data-act="cur" aria-label="Display currency">${cur} <i class="ri-arrow-down-s-line"></i></button><span class="tag pend">New wallet</span></div>
+    <div class="k" style="margin-top:var(--s4)">Total wallet balance</div>
+    <div class="figure">${PRE[cur]}0.00${SUF[cur]}</div>
+    <div class="eq">Add funds to get started</div>
+  </section>
+  <nav class="qa" aria-label="Wallet actions">
+    <button class="blush" data-act="send" aria-disabled="true"><i class="ri-arrow-up-line"></i>Send</button>
+    <button class="mist" data-act="receive"><i class="ri-arrow-down-line"></i>Receive</button>
+    <button class="lilac" data-act="swapempty" aria-disabled="true"><i class="ri-arrow-left-right-line"></i>Swap</button>
+    <button class="sand" data-act="transfer"><i class="ri-exchange-funds-line"></i>Transfer</button>
+  </nav>
+  <section class="card fund">
+    <h3>Fund your wallet</h3>
+    <button class="row" data-act="transfer"><i class="n" style="--tone:#ded6f0"><i class="ri-exchange-funds-line"></i></i>
+      <div class="m"><div class="nm">Transfer from Javas Exchange</div><div class="sm">Instant and free · from your spot account</div></div><i class="ri-arrow-right-s-line" style="color:var(--ink-3);font-size:18px"></i></button>
+    <button class="row" data-act="receive"><i class="n" style="--tone:#f7dcd9"><i class="ri-qr-code-line"></i></i>
+      <div class="m"><div class="nm">Receive crypto</div><div class="sm">Get your address for USDT, BTC, ETH and more</div></div><i class="ri-arrow-right-s-line" style="color:var(--ink-3);font-size:18px"></i></button>
+  </section>
+  <section class="card"><h3>Recent activity</h3><p class="empty"><i class="ri-inbox-line"></i>No activity yet. Your first deposit will show here.</p></section>`;
+const EMPTY_SWAP = `<section class="card state">
+    <div class="tile" style="--tone:#ded6f0"><i class="ri-arrow-left-right-line"></i></div>
+    <b>Nothing to swap yet</b>
+    <p>Add funds to your wallet, then convert between assets here at exchange rates.</p>
+    <button class="btn" data-act="transfer"><i class="ri-exchange-funds-line"></i>Transfer funds</button>
+  </section>`;
 
 /* ================= router ================= */
 const render = () => {
   const [, path = '', arg] = location.hash.slice(1).split('/');
   const key = '/' + path, scr = (SCREENS[key] || SCREENS['/'])(arg);
+  const dataScreen = key !== '/settings';
+  if (DEMO === 'error' && dataScreen) scr.body = ERROR_BODY();
+  else if (DEMO === 'empty' && (key === '/' || key === '/asset')) scr.body = EMPTY_HOME();
+  else if (DEMO === 'empty' && key === '/swap') scr.body = EMPTY_SWAP;
+  if (isOffline()) scr.body = OFFBAR() + scr.body;
   $('#hd').innerHTML = scr.hd;
   $('#pg').innerHTML = scr.body;
+  if (isOffline()) document.querySelectorAll('.qa [data-act=send], .qa [data-act=transfer]').forEach(b => b.setAttribute('aria-disabled', 'true'));
   $('#app').classList.toggle('masked', hidden);
   document.querySelectorAll('.tabbar a').forEach(a => a.getAttribute('href') === '#' + (key === '/asset' ? '/' : key) ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
   document.querySelectorAll('.theme-toggle').forEach(b => b.onclick = () => JVXTheme.toggle());
-  if (key === '/activity') initActivity();
-  if (key === '/swap') initSwap();
+  if (key === '/activity' && DEMO !== 'error') initActivity();
+  if (key === '/swap' && $('#sf')) initSwap();
   if (key === '/settings') $('#pcur').onchange = e => setCur(e.target.value);
   scrollTo(0, 0);
 };
@@ -440,8 +674,10 @@ function initActivity() {
   const box = $('#txs');
   const draw = f => {
     const m = { All:() => 1, Received:t => t.dir === 'in', Sent:t => t.dir === 'out', Swaps:t => t.dir === 'swap', Pending:t => t.st === 'pend' }[f];
-    const list = TX.filter(m);
-    if (!list.length) { box.innerHTML = '<p class="empty"><i class="ri-inbox-line"></i>Nothing here yet.</p>'; return; }
+    const list = (DEMO === 'empty' ? [] : TX).filter(m);
+    if (!list.length) { box.innerHTML = DEMO === 'empty'
+      ? `<div class="state" style="padding:var(--s6) 0"><div class="tile" style="--tone:#f8e7c2"><i class="ri-file-list-3-line"></i></div><b>No activity yet</b><p>Sends, receipts, swaps and transfers will be listed here.</p><button class="btn" data-act="receive"><i class="ri-arrow-down-line"></i>Receive funds</button></div>`
+      : `<p class="empty"><i class="ri-inbox-line"></i>No ${f.toLowerCase()} transactions.</p>`; return; }
     let day = '';
     box.innerHTML = list.map(t => { const d = t.when.split(' · ')[0]; const hd = d !== day ? `<div class="day">${day = d}</div>` : ''; return hd + txRow(t); }).join('');
   };
@@ -471,7 +707,7 @@ function initSwap() {
   sf.onchange = st.onchange = sa.oninput = calc;
   $('#smax').onclick = () => { sa.value = f(BY[sf.value].amt, dp(BY[sf.value])); calc(); };
   $('#sflip').onclick = () => { [sf.value, st.value] = [st.value, sf.value]; calc(); };
-  $('#sgo').onclick = () => { const q = calc(); openSheet(`<div class="sh"><h2 id="sh-t">Confirm swap</h2>${X}</div>
+  $('#sgo').onclick = () => { if (isOffline()) return toast("You're offline — swaps need a connection"); const q = calc(); openSheet(`<div class="sh"><h2 id="sh-t">Confirm swap</h2>${X}</div>
     <div class="info"><div><span>You pay</span><b>${f(q.n, dp(q.a))} ${q.a.sym}</b></div><div><span>You get</span><b>≈ ${f(q.out, dp(q.b))} ${q.b.sym}</b></div><div><span>Slippage limit</span><b>0.5%</b></div></div>
     <button class="btn full" data-done="Swap complete|${f(q.out, dp(q.b))} ${q.b.sym} is in your wallet.">Swap now</button>`); };
   calc();
@@ -513,7 +749,8 @@ function send(sym = 'USDT', st = {}) {
   const a = $('#sa2'), n = $('#sn'), to = $('#sto'), amt = $('#samt');
   const nets = () => { n.innerHTML = BY[a.value].nets.map(x => `<option>${x}</option>`).join(''); dests(); };
   const dests = () => {
-    to.innerHTML = BOOK.filter(b => (b.sym === '*' || b.sym === a.value) && (b.net === '*' || b.net === n.value)).map(b => `<option>${b.name}${b.addr === 'internal' ? '' : ' ' + b.addr}</option>`).join('')
+    to.innerHTML = BOOK.filter(b => (b.sym === '*' || b.sym === a.value) && (b.net === '*' || b.net === n.value)).map(b => b.until > Date.now()
+      ? `<option disabled>${esc(b.name)} ${esc(b.addr)} · on hold until ${when(b.until)}</option>` : `<option>${esc(b.name)}${b.addr === 'internal' ? '' : ' ' + esc(b.addr)}</option>`).join('')
       + '<option disabled>Add new addresses in Settings → Address book</option>';
     calc();
   };
@@ -530,6 +767,8 @@ function send(sym = 'USDT', st = {}) {
   $('#smx').onclick = () => { amt.value = f(BY[a.value].amt, dp(BY[a.value])); calc(); };
   $('#snx').onclick = () => review(calc());
   nets();
+  if (st.net && BY[a.value].nets.includes(st.net)) { n.value = st.net; dests(); }
+  if (st.to) { const o = [...to.options].find(x => !x.disabled && x.text.startsWith(st.to)); if (o) { to.value = o.value; calc(); } }
 }
 function review(q) {
   const hkd = q.v * q.h.px, approver = hkd > 500000;
@@ -540,18 +779,221 @@ function review(q) {
     ${approver ? '<p class="warn">Above HK$ 500,000 — Mei Lau will be asked to approve before it is sent.</p>' : ''}
     <div class="acts2"><button class="btn ghost" id="rbk">Back</button><button class="btn" id="rok">Confirm</button></div>`);
   $('#rbk').onclick = () => send(q.h.sym, { amt: f(q.v, dp(q.h)) });
-  $('#rok').onclick = () => {
-    openSheet(`<div class="sh"><h2 id="sh-t">Enter 2FA code</h2>${X}</div>${steps(3)}
-      <p style="font-size:13px;color:var(--ink-2)">Open Google Authenticator and enter the 6-digit code for Javas Exchange.</p>
-      <div class="otp" id="otp">${'<input inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit">'.repeat(6)}</div>
-      <p class="sm" style="font-size:var(--t-label);color:var(--ink-3)">Preview: any 6 digits work.</p>`);
-    const ins = [...document.querySelectorAll('#otp input')]; ins[0].focus();
-    ins.forEach((el, i) => {
-      el.oninput = () => { el.value = el.value.replace(/\D/g, ''); if (el.value && ins[i + 1]) ins[i + 1].focus();
-        if (ins.every(x => x.value)) doneSheet(approver ? 'Sent for approval' : 'Send submitted', approver ? `Mei Lau has been notified. You'll see it in Activity once approved.` : `${f(q.v - q.fee, dp(q.h))} ${q.h.sym} is on its way. Track it in Activity.`); };
-      el.onkeydown = e => { if (e.key === 'Backspace' && !el.value && ins[i - 1]) ins[i - 1].focus(); };
+  $('#rok').onclick = () => twoFA(steps(3), () => doneSheet(approver ? 'Sent for approval' : 'Send submitted',
+    approver ? `Mei Lau has been notified. You'll see it in Activity once approved.` : `${f(q.v - q.fee, dp(q.h))} ${q.h.sym} is on its way. Track it in Activity.`));
+}
+function twoFA(stepsHtml, done) {
+  openSheet(`<div class="sh"><h2 id="sh-t">Enter 2FA code</h2>${X}</div>${stepsHtml}
+    <p style="font-size:13px;color:var(--ink-2)">Open Google Authenticator and enter the 6-digit code for Javas Exchange.</p>
+    <div class="otp" id="otp">${'<input inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit">'.repeat(6)}</div>
+    <p class="sm" style="font-size:var(--t-label);color:var(--ink-3)">Preview: any 6 digits work.</p>`);
+  const ins = [...document.querySelectorAll('#otp input')]; ins[0].focus();
+  ins.forEach((el, i) => {
+    el.oninput = () => { el.value = el.value.replace(/\D/g, ''); if (el.value && ins[i + 1]) ins[i + 1].focus(); if (ins.every(x => x.value)) done(); };
+    el.onkeydown = e => { if (e.key === 'Backspace' && !el.value && ins[i - 1]) ins[i - 1].focus(); };
+  });
+}
+
+/* recovery backup: status → 2FA → reveal kit → prove it's saved → done.
+   ponytail: the code is a stable fake per account; the custody API issues the real one. */
+const BACKUP = { verified: null };
+const RCODE = (() => {
+  let s = hash('9642943'), out = [];
+  const al = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';   // no 0/O/1/I — easy to copy by hand
+  for (let g = 0; g < 6; g++) { let w = ''; for (let i = 0; i < 4; i++) { s = Math.imul(s ^ s >>> 13, 1597334677) >>> 0; w += al[s % al.length]; } out.push(w); }
+  return out;
+})();
+function backup() {
+  const v = BACKUP.verified;
+  openSheet(`<div class="sh"><h2 id="sh-t">Recovery backup</h2>${X}</div>
+    <section class="card hero" style="padding:var(--s4) var(--s5)">
+      <div class="kh"><span class="k">Status</span><span class="tag ${v ? 'ok' : 'pend'}">${v ? 'Verified' : 'Not verified'}</span></div>
+      <div style="font-size:var(--t-h3);font-weight:600;margin-top:6px">${v ? 'Your wallet can be recovered' : 'Check your recovery code'}</div>
+      <div class="quad" style="margin-top:var(--s3)">
+        <div><div class="k">Encrypted backup</div><div class="v" style="font-size:14px">Javas vault</div></div>
+        <div><div class="k">Last verified</div><div class="v" style="font-size:14px">${v ? when(v) : 'Never'}</div></div>
+      </div>
+    </section>
+    <section class="card rules">
+      <h3>How recovery works</h3>
+      <div class="rule ok"><i class="ri-safe-2-line"></i><span>Your keys are backed up, encrypted, with Javas</span></div>
+      <div class="rule ok"><i class="ri-key-2-line"></i><span>The recovery code unlocks that backup on a new phone</span></div>
+      <div class="rule"><i class="ri-error-warning-line" style="color:var(--flag)"></i><span>Javas staff can't see or reset your code</span></div>
+    </section>
+    <button class="btn full" id="bgo"><i class="ri-eye-line"></i>${v ? 'View recovery code' : 'View and verify code'}</button>`);
+  $('#bgo').onclick = () => twoFA(steps(1, 3), backupKit);
+}
+function backupKit() {
+  openSheet(`<div class="sh"><h2 id="sh-t">Your recovery code</h2>${X}</div>${steps(2, 3)}
+    <div class="rkit" id="rkit" data-hidden="1">
+      <ol>${RCODE.map(g => `<li>${g}</li>`).join('')}</ol>
+      <button type="button" class="rveil" id="rrev"><i class="ri-eye-line"></i>Tap to reveal<small>Make sure no one can see your screen</small></button>
+    </div>
+    <div class="acts2"><button class="btn ghost" id="rcp" disabled><i class="ri-file-copy-line"></i>Copy</button><button class="btn ghost" id="rhd" disabled><i class="ri-eye-off-line"></i>Hide</button></div>
+    <p class="warn">Write it on paper and keep it somewhere safe. Don't screenshot it or save it in email or chat.</p>
+    <label class="row2" style="justify-content:flex-start;gap:10px;font-weight:400;font-size:14px;color:var(--ink)"><input type="checkbox" id="rsaved" style="width:20px;height:20px;min-height:0;accent-color:var(--deep)">I've written it down</label>
+    <button class="btn full" id="rnx" disabled>Continue</button>`);
+  const kit = $('#rkit'), show = on => { kit.dataset.hidden = on ? '' : '1'; $('#rcp').disabled = $('#rhd').disabled = !on; };
+  $('#rrev').onclick = () => show(true); $('#rhd').onclick = () => show(false);
+  $('#rcp').onclick = async () => { try { await navigator.clipboard.writeText(RCODE.join('-')); toast('Copied — clear your clipboard after'); } catch (e) { toast('Copy failed'); } };
+  $('#rsaved').onchange = e => $('#rnx').disabled = !e.target.checked;
+  $('#rnx').onclick = backupCheck;
+}
+function backupCheck() {
+  // ask for two groups, picked fresh each time so it can't be learned by rote
+  const a = Math.floor(Math.random() * 3), b = 3 + Math.floor(Math.random() * 3);
+  openSheet(`<div class="sh"><h2 id="sh-t">Check your code</h2>${X}</div>${steps(3, 3)}
+    <p style="font-size:13px;color:var(--ink-2)">From what you wrote down, enter these two groups.</p>
+    <div class="acts2">
+      <div class="fl"><label for="rg1">Group ${a + 1}</label><input id="rg1" maxlength="4" autocomplete="off" spellcheck="false" style="font-family:var(--mono);text-transform:uppercase;letter-spacing:.2em;font-size:18px;text-align:center"></div>
+      <div class="fl"><label for="rg2">Group ${b + 1}</label><input id="rg2" maxlength="4" autocomplete="off" spellcheck="false" style="font-family:var(--mono);text-transform:uppercase;letter-spacing:.2em;font-size:18px;text-align:center"></div>
+    </div>
+    <p class="err" id="rer" hidden></p>
+    <div class="acts2"><button class="btn ghost" id="rbk">Show code again</button><button class="btn" id="rdo" disabled>Verify</button></div>`);
+  const g1 = $('#rg1'), g2 = $('#rg2'), go = $('#rdo');
+  g1.focus();
+  [g1, g2].forEach(i => i.oninput = () => { i.value = i.value.toUpperCase().replace(/[^0-9A-Z]/g, ''); if (i === g1 && i.value.length === 4) g2.focus(); go.disabled = g1.value.length < 4 || g2.value.length < 4; $('#rer').hidden = true; });
+  $('#rbk').onclick = backupKit;
+  go.onclick = () => {
+    if (g1.value !== RCODE[a] || g2.value !== RCODE[b]) { $('#rer').textContent = "That doesn't match. Check what you wrote, or view the code again."; $('#rer').hidden = false; return; }
+    BACKUP.verified = Date.now();
+    doneSheet('Backup verified', 'Keep your written code safe. You can view it again any time from Settings.');
+    if (location.hash === '#/settings') render();
+  };
+}
+
+/* QR scanner. Camera + the browser's own BarcodeDetector where it exists; paste, image upload
+   and (preview only) a sample code otherwise. onRead gets the decoded text.
+   ponytail: no QR library — iOS Safari has no BarcodeDetector, so the native shell (VisionKit /
+   ML Kit) does the decoding there, or add a decoder lib if this ships as a web app. */
+const scanEl = $('#scan');
+let scanStream = null, scanTimer = 0;
+addEventListener('keydown', e => { if (e.key === 'Escape' && !scanEl.hidden) stopScan(); });
+const stopScan = () => { clearInterval(scanTimer); scanStream?.getTracks().forEach(t => t.stop()); scanStream = null; scanEl.hidden = true; scanEl.innerHTML = ''; };
+async function scanQR(onRead, title = 'Scan address') {
+  const detector = 'BarcodeDetector' in window ? new BarcodeDetector({ formats: ['qr_code'] }) : null;
+  scanEl.className = 'scan'; scanEl.hidden = false;
+  scanEl.innerHTML = `<video playsinline muted></video>
+    <div class="shade">
+      <div class="top"><span class="lbl">${title}</span><button class="ib" id="qx" aria-label="Close scanner"><i class="ri-close-line"></i></button></div>
+      <div class="vf"><i class="line"></i><div class="msg" id="qmsg" hidden></div></div>
+      <p class="hint" id="qhint">Point at a wallet address QR code</p>
+      <div class="acts2"><button class="btn ghost" id="qpaste"><i class="ri-clipboard-line"></i>Paste address</button>
+        <label class="btn ghost" style="margin:0;font-size:14px;font-weight:500"><i class="ri-image-line"></i>Upload image<input type="file" accept="image/*" id="qfile" hidden></label></div>
+      <button class="sample" id="qsample">Preview · use sample QR</button>
+    </div>`;
+  const done = text => { stopScan(); onRead(text.trim()); };
+  const noCam = (icon, msg) => { scanEl.classList.add('nocam'); const m = $('#qmsg'); m.hidden = false; m.innerHTML = `<i class="${icon}"></i>${msg}`; $('#qhint').textContent = 'Paste the address or upload a photo of the QR'; };
+  $('#qx').onclick = stopScan;
+  $('#qpaste').onclick = async () => { try { const t = await navigator.clipboard.readText(); t.trim() ? done(t) : toast('Clipboard is empty'); } catch (e) { toast('Paste not allowed here'); } };
+  $('#qsample').onclick = () => done('ethereum:0x3f9a5be1c0d27e4a8b916f3d5c2e7a09b4d8c41e?value=0');
+  $('#qfile').onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    if (!detector) return toast("This browser can't read QR images");
+    try { const [c] = await detector.detect(await createImageBitmap(f)); c ? done(c.rawValue) : toast('No QR code found in that image'); } catch (x) { toast("Couldn't read that image"); }
+  };
+  if (!navigator.mediaDevices?.getUserMedia) return noCam('ri-camera-off-line', 'Camera not available here');
+  try {
+    scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+    if (scanEl.hidden) return stopScan();          // closed while the permission prompt was up
+    const v = scanEl.querySelector('video'); v.srcObject = scanStream; await v.play();
+    if (!detector) return noCam('ri-qr-code-line', 'Live scanning needs the app — paste or upload instead');
+    scanTimer = setInterval(async () => { try { const [c] = await detector.detect(v); if (c) done(c.rawValue); } catch (x) {} }, 250);
+  } catch (e) {
+    noCam('ri-camera-off-line', e.name === 'NotAllowedError' ? 'Camera access is off. Allow it in your phone settings.' : 'No camera found');
+  }
+}
+// "ethereum:0xabc?value=1", "bitcoin:bc1q…", plain addresses → { addr, net }
+const SCHEME_NET = { ethereum: 'Ethereum (ERC-20)', bitcoin: 'Bitcoin', tron: 'Tron (TRC-20)', solana: 'Solana', xrp: 'XRP Ledger', ripple: 'XRP Ledger' };
+const parseQR = text => {
+  const m = text.match(/^([a-z]+):(?:\/\/)?([^?@/]+)/i), addr = (m ? m[2] : text).trim();
+  const net = (m && SCHEME_NET[m[1].toLowerCase()]) || Object.keys(ADDR_RE).find(n => ADDR_RE[n].test(addr));
+  return { addr, net: net && ADDR_RE[net].test(addr) ? net : null };
+};
+// header scan: whitelisted → Send to it; known format → offer to add it; anything else → say so
+const scanToSend = () => scanQR(text => {
+  const { addr, net } = parseQR(text);
+  if (!net) return openSheet(`<div class="sh"><h2 id="sh-t">Not a wallet address</h2>${X}</div>
+    <p style="font-size:14px;color:var(--ink-2)">That QR code doesn't contain an address we support.</p><code class="ad">${esc(text.slice(0, 120))}</code>
+    <div class="acts2"><button class="btn ghost" data-x>Close</button><button class="btn" data-act="scan">Scan again</button></div>`);
+  const hit = BOOK.find(b => b.full === addr || (b.addr !== 'internal' && b.net === net && addr.startsWith(b.addr.split('…')[0]) && addr.endsWith(b.addr.split('…')[1] || '')));
+  if (hit && !(hit.until > Date.now())) return send(HOLD.find(h => h.nets.includes(net)).sym, { net, to: hit.name });
+  openSheet(`<div class="sh"><h2 id="sh-t">${hit ? 'Address on hold' : 'New address'}</h2>${X}</div>
+    <div class="info"><div><span>Network</span><b>${net}</b></div><div><span>Address</span><b style="font-family:var(--mono);font-size:12px">${esc(addr)}</b></div></div>
+    <p class="warn">${hit ? `${esc(hit.name)} can be used from ${when(hit.until)} HKT.` : "You can only send to whitelisted addresses. Add this one first — it'll be usable after a 24-hour hold."}</p>
+    ${hit ? '<button class="btn full" data-x>OK</button>' : '<div class="acts2"><button class="btn ghost" data-x>Cancel</button><button class="btn" id="qadd">Add to address book</button></div>'}`);
+  $('#qadd')?.addEventListener('click', () => addAddress({ owner: 'own', host: 'self', net, addr }));
+});
+
+/* add a whitelisted address: details (with travel-rule owner info) → review → 2FA → 24h hold.
+   ponytail: the format checks catch typos only; the address-screening API makes the real call. */
+const NETS = [...new Set(HOLD.flatMap(h => h.nets))];
+const ADDR_RE = {
+  'Ethereum (ERC-20)': /^0x[0-9a-fA-F]{40}$/,
+  'Tron (TRC-20)': /^T[1-9A-HJ-NP-Za-km-z]{33}$/,
+  'Bitcoin': /^(bc1[02-9ac-hj-np-z]{11,71}|[13][1-9A-HJ-NP-Za-km-z]{25,34})$/,
+  'Solana': /^[1-9A-HJ-NP-Za-km-z]{32,44}$/,
+  'XRP Ledger': /^r[1-9A-HJ-NP-Za-km-z]{24,34}$/,
+};
+const ADDR_EG = { 'Ethereum (ERC-20)': '0x…  (42 characters)', 'Tron (TRC-20)': 'T…  (34 characters)', 'Bitcoin': 'bc1q…', 'Solana': 'Base58, 32–44 characters', 'XRP Ledger': 'r…' };
+const HOLD_MS = 24 * 3600e3;
+const short = a => a.length > 14 ? a.slice(0, 6) + '…' + a.slice(-4) : a;
+const when = t => new Date(t).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Hong_Kong' });
+function addAddress(d = { owner: 'own', host: 'self', net: 'Ethereum (ERC-20)' }) {
+  const segBtn = (key, val, label) => `<button type="button" data-${key}="${val}" aria-pressed="${d[key] === val}">${label}</button>`;
+  openSheet(`<div class="sh"><h2 id="sh-t">Add address</h2>${X}</div>${steps(1)}
+    <div class="fl"><label for="al">Label</label><input id="al" maxlength="40" placeholder="e.g. Treasury cold wallet" value="${d.label || ''}"></div>
+    <div class="fl"><label for="anet">Network</label><select id="anet">${NETS.map(n => `<option ${n === d.net ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+    <div class="fl"><label for="aad">Address <b id="afmt"></b></label>
+      <div class="unit"><input id="aad" autocomplete="off" spellcheck="false" style="font-family:var(--mono);font-size:13px" value="${d.addr || ''}">
+        <span class="u"><button type="button" id="apaste">Paste</button><button type="button" id="ascan" aria-label="Scan QR code"><i class="ri-qr-scan-2-line"></i></button></span></div>
+      <p class="err" id="aer" hidden></p></div>
+    <div class="fl"><label>Who owns this wallet?</label><div class="seg" role="group" aria-label="Owner">${segBtn('owner', 'own', 'Our company')}${segBtn('owner', 'other', 'Someone else')}</div></div>
+    <div class="fl" id="aobox" ${d.owner === 'other' ? '' : 'hidden'}><label for="aon">Owner's full legal name</label><input id="aon" placeholder="Person or company" value="${d.oname || ''}"></div>
+    <div class="fl"><label>Where is it held?</label><div class="seg" role="group" aria-label="Wallet type">${segBtn('host', 'self', 'Own wallet')}${segBtn('host', 'vasp', 'An exchange')}</div></div>
+    <div class="fl" id="avbox" ${d.host === 'vasp' ? '' : 'hidden'}><label for="avn">Which exchange?</label><select id="avn">${['Binance', 'Coinbase', 'OKX', 'HashKey Exchange', 'OSL', 'Other'].map(v => `<option ${v === d.vasp ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
+    <p class="warn">Hong Kong's travel rule asks who owns the wallet. New addresses can be used after a 24-hour security hold.</p>
+    <button class="btn full" id="anx" disabled>Review</button>`);
+  const el = id => $('#' + id);
+  const check = () => {
+    const net = el('anet').value, a = el('aad').value.trim(), ok = ADDR_RE[net]?.test(a);
+    el('afmt').textContent = ADDR_EG[net];
+    const dup = BOOK.some(b => b.full === a);
+    const bad = !a ? '' : dup ? 'This address is already in your address book.' : !ok ? `That isn't a valid ${net} address.` : '';
+    el('aer').textContent = bad; el('aer').hidden = !bad;
+    el('anx').disabled = !el('al').value.trim() || !ok || dup || (d.owner === 'other' && !el('aon').value.trim());
+  };
+  sh.querySelectorAll('[data-owner],[data-host]').forEach(b => b.onclick = () => {
+    const k = b.dataset.owner ? 'owner' : 'host'; d[k] = b.dataset[k];
+    sh.querySelectorAll(`[data-${k}]`).forEach(x => x.setAttribute('aria-pressed', x === b));
+    el('aobox').hidden = d.owner !== 'other'; el('avbox').hidden = d.host !== 'vasp'; check();
+  });
+  el('ascan').onclick = () => {
+    Object.assign(d, { label: el('al').value, oname: el('aon').value });
+    sheet.close();
+    scanQR(text => { const r = parseQR(text); addAddress({ ...d, addr: r.addr, net: r.net || el('anet')?.value || d.net }); }, 'Scan address to add');
+  };
+  el('apaste').onclick = async () => { try { el('aad').value = (await navigator.clipboard.readText()).trim(); check(); } catch (e) { toast('Paste not allowed here — type or long-press to paste'); } };
+  ['al', 'aad', 'aon'].forEach(i => el(i).oninput = check); el('anet').onchange = check;
+  el('anx').onclick = () => {
+    Object.assign(d, { label: el('al').value.trim(), net: el('anet').value, addr: el('aad').value.trim(), oname: el('aon').value.trim(), vasp: el('avn').value });
+    openSheet(`<div class="sh"><h2 id="sh-t">Review address</h2>${X}</div>${steps(2)}
+      <div class="info"><div><span>Label</span><b>${esc(d.label)}</b></div><div><span>Network</span><b>${d.net}</b></div>
+        <div><span>Address</span><b style="font-family:var(--mono);font-size:12px">${esc(d.addr)}</b></div>
+        <div><span>Owner</span><b>${d.owner === 'own' ? 'Wing Chan Trading Ltd' : esc(d.oname)}</b></div>
+        <div><span>Held at</span><b>${d.host === 'vasp' ? d.vasp : 'Own wallet'}</b></div>
+        <div><span>Usable from</span><b>${when(Date.now() + HOLD_MS)} HKT</b></div></div>
+      <p class="warn">Check the address character by character. Funds sent to a wrong address can't be recovered.</p>
+      <div class="acts2"><button class="btn ghost" id="abk">Back</button><button class="btn" id="aok">Confirm</button></div>`);
+    $('#abk').onclick = () => addAddress(d);
+    $('#aok').onclick = () => twoFA(steps(3), () => {
+      const until = Date.now() + HOLD_MS;
+      BOOK.push({ name: d.label, note: d.net + (d.host === 'vasp' ? ' · ' + d.vasp : ''), sym: '*', net: d.net, addr: short(d.addr), full: d.addr, until });
+      doneSheet('Address added', `${esc(d.label)} is on a 24-hour security hold. You can send to it from ${when(until)} HKT.`);
+      if (location.hash === '#/settings') render();
     });
   };
+  check();
 }
 function transfer() {
   // move between this wallet and the user's Javas Exchange spot account
@@ -572,8 +1014,131 @@ function txDetail(t) {
   openSheet(`<div class="sh"><h2 id="sh-t">${{ in:'Received', out:'Sent', swap:'Swapped to' }[t.dir]} ${t.sym}</h2>${X}</div>
     <div class="pair">${coin(h, 1)}<div><div class="figure" style="font-size:26px;margin:0">${t.dir === 'out' ? '−' : '+'}${f(t.amt, dp(h))} ${t.sym}</div><div class="sm">≈ HK$ ${f(t.amt * h.px)}</div></div></div>
     <div class="info"><div><span>Status</span><b><span class="tag ${t.st}">${t.stx}</span></b></div><div><span>${t.dir === 'in' ? 'From' : 'To'}</span><b>${t.who.replace(/^(From|To) /, '')}</b></div>
-      <div><span>Time</span><b>${t.when} HKT</b></div><div><span>Network</span><b>${h.nets[0]}</b></div><div><span>Tx hash</span><b style="font-family:var(--mono);font-size:12px">${addrFor('tx' + t.id, 'Ethereum (ERC-20)').slice(0, 18)}…</b></div></div>
-    <div class="acts2"><button class="btn ghost" data-act="soon"><i class="ri-external-link-line"></i>Explorer</button><button class="btn ghost" data-act="soon"><i class="ri-customer-service-2-line"></i>Get help</button></div>`);
+      <div><span>Time</span><b>${t.when} HKT</b></div><div><span>Network</span><b>${txInternal(t) ? 'Internal · Javas' : txNet(t)}</b></div>
+      <div><span>${txInternal(t) ? 'Reference' : 'Tx hash'}</span><b style="font-family:var(--mono);font-size:12px">${txInternal(t) ? txRef(t) : short(txHash(t))}</b></div></div>
+    <div class="acts2"><button class="btn ghost" id="txex"><i class="ri-external-link-line"></i>Explorer</button><button class="btn ghost" id="txhelp"><i class="ri-customer-service-2-line"></i>Get help</button></div>`);
+  $('#txex').onclick = () => explorer(t);
+  $('#txhelp').onclick = () => getHelp(t);
+}
+
+/* ---- transaction helpers: network, hash, reference, date ----
+   ponytail: hashes are stable fakes shaped like each chain's; the wallet API returns real ones. */
+const txInternal = t => t.dir === 'swap' || t.who.includes('Javas Exchange');
+const txNet = t => t.who.includes('OTC settlement') ? 'Tron (TRC-20)' : BY[t.sym].nets[0];
+const txRef = t => 'JVX-TX-' + String(90412 + t.id * 37);
+const txHash = t => {
+  const net = txNet(t); let x = hash('tx' + t.id + net), r = '';
+  const pick = (al, n) => { for (let i = 0; i < n; i++) { x = Math.imul(x ^ x >>> 13, 1597334677) >>> 0; r += al[x % al.length]; } return r; };
+  if (net === 'Solana') return pick('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz', 88);
+  const hex = pick('0123456789abcdef', 64);
+  return net.includes('ERC') ? '0x' + hex : net === 'XRP Ledger' ? hex.toUpperCase() : hex;
+};
+const EXPLORERS = {
+  'Ethereum (ERC-20)': ['Etherscan', 'https://etherscan.io/tx/'], 'Tron (TRC-20)': ['Tronscan', 'https://tronscan.org/#/transaction/'],
+  'Bitcoin': ['mempool.space', 'https://mempool.space/tx/'], 'Solana': ['Solscan', 'https://solscan.io/tx/'], 'XRP Ledger': ['XRPSCAN', 'https://xrpscan.com/tx/'],
+};
+// all statement dates are Hong Kong dates, whatever timezone the phone is set to
+const NOW = new Date();
+const hkDay = d => d.toLocaleDateString('en-CA', { timeZone: 'Asia/Hong_Kong' });               // 'YYYY-MM-DD'
+const hkStamp = d => d.toLocaleString('sv-SE', { timeZone: 'Asia/Hong_Kong' }).slice(0, 16);     // 'YYYY-MM-DD HH:MM'
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const txDate = t => {   // 'Today · 10:44' / 'Yesterday · …' / '16 Oct · 15:47' (HKT) → Date
+  const [d, hm] = t.when.split(' · ');
+  let day = d === 'Today' ? hkDay(NOW) : d === 'Yesterday' ? hkDay(new Date(NOW - 864e5)) : null;
+  if (!day) { const [dd, mm] = d.split(' '); day = `${hkDay(NOW).slice(0, 4)}-${String(MON.indexOf(mm) + 1).padStart(2, '0')}-${dd.padStart(2, '0')}`; }
+  return new Date(`${day}T${hm}:00+08:00`);
+};
+
+function explorer(t) {
+  if (txInternal(t)) {
+    openSheet(`<div class="sh"><h2 id="sh-t">No blockchain record</h2>${X}</div>
+    <p style="font-size:14px;color:var(--ink-2);line-height:1.55">${t.dir === 'swap' ? 'Swaps' : 'Transfers with your Javas Exchange account'} settle inside Javas, so there's nothing to look up on a block explorer. Quote this reference if you contact support.</p>
+    <div class="info"><div><span>Reference</span><b style="font-family:var(--mono)">${txRef(t)}</b></div></div>
+    <div class="acts2"><button class="btn ghost" id="excp"><i class="ri-file-copy-line"></i>Copy reference</button><button class="btn" data-x>Done</button></div>`);
+    return copyBtn('#excp', txRef(t));
+  }
+  const net = txNet(t), [name, base] = EXPLORERS[net], hx = txHash(t);
+  openSheet(`<div class="sh"><h2 id="sh-t">View on ${name}</h2>${X}</div>
+    <div class="info"><div><span>Network</span><b>${net}</b></div><div><span>Status</span><b><span class="tag ${t.st}">${t.stx}</span></b></div></div>
+    <div class="fl"><label>Transaction hash</label><code class="ad" style="text-align:left">${hx}</code></div>
+    <p class="warn">${name} is an independent public site, not run by Javas. Preview hashes are samples and won't be found there.</p>
+    <div class="acts2"><button class="btn ghost" id="excp"><i class="ri-file-copy-line"></i>Copy hash</button><a class="btn" href="${base + hx}" target="_blank" rel="noopener noreferrer" aria-label="Open on ${name}"><i class="ri-external-link-line"></i>Open</a></div>`);
+  copyBtn('#excp', hx);
+}
+const copyBtn = (sel, text) => { const b = $(sel); if (b) b.onclick = async () => { try { await navigator.clipboard.writeText(text); toast('Copied'); } catch (e) { toast('Copy failed'); } }; };
+
+function getHelp(t) {
+  const ISSUES = {
+    late: ['It hasn\'t arrived', t.dir === 'out' ? `Sends usually arrive within 30 minutes. This one is ${t.stx.toLowerCase()}. Some receiving exchanges credit only after their own checks.` : 'Incoming funds appear after the network confirms them. Check that the sender used the right network.'],
+    wrong: ['Sent to the wrong address', 'Blockchain transfers can\'t be reversed by Javas. If the address belongs to an exchange, their support may be able to help — we\'ll give you what they need.'],
+    fail: ['It was rejected or failed', 'Rejected sends never leave your wallet, so your balance is unchanged. Support can tell you why it was rejected.'],
+    other: ['Something else', 'Tell us what happened and we\'ll get back to you.'],
+  };
+  const pickIssue = k => {
+    const [title, answer] = ISSUES[k];
+    openSheet(`<div class="sh"><h2 id="sh-t">${title}</h2>${X}</div>
+      <p class="warn" style="border-left-color:var(--deep)">${answer}</p>
+      <div class="fl"><label for="hmsg">Message to support <b>${txRef(t)} attached</b></label><textarea id="hmsg" rows="4" maxlength="1000" placeholder="What happened? Include anything that helps." style="padding:10px 12px;resize:vertical"></textarea></div>
+      <div class="acts2"><button class="btn ghost" id="hbk">Back</button><button class="btn" id="hgo" ${k === 'other' ? 'disabled' : ''}>Contact support</button></div>`);
+    const m = $('#hmsg'); m.oninput = () => $('#hgo').disabled = k === 'other' && !m.value.trim();
+    $('#hbk').onclick = () => getHelp(t);
+    $('#hgo').onclick = () => doneSheet('Request sent', `Ticket JVX-${4200 + t.id * 13} is open. Support usually replies within 2 hours, 9:00–18:00 HKT. You'll get a notification.`);
+  };
+  openSheet(`<div class="sh"><h2 id="sh-t">Get help</h2>${X}</div>
+    <div class="info"><div><span>Transaction</span><b>${{ in: 'Received', out: 'Sent', swap: 'Swapped to' }[t.dir]} ${f(t.amt, dp(BY[t.sym]))} ${t.sym}</b></div><div><span>Reference</span><b style="font-family:var(--mono)">${txRef(t)}</b></div></div>
+    <section class="card rules" style="padding:var(--s3) var(--s4)"><h3>What's the problem?</h3>
+      ${Object.entries(ISSUES).map(([k, [title]]) => `<button class="row" data-issue="${k}" style="padding:12px 0"><div class="m"><div class="nm">${title}</div></div><i class="ri-arrow-right-s-line" style="color:var(--ink-3);font-size:18px"></i></button>`).join('')}
+    </section>`);
+  sh.querySelectorAll('[data-issue]').forEach(b => b.onclick = () => pickIssue(b.dataset.issue));
+}
+
+/* export statement: CSV is built here and downloaded; PDF is emailed by the backend.
+   ponytail: CSV covers the sample TX list; the statements API covers full history. */
+function exportStatement() {
+  const [Y, M] = hkDay(NOW).split('-').map(Number), pad = n => String(n).padStart(2, '0');
+  const lastY = M === 1 ? Y - 1 : Y, lastM = M === 1 ? 12 : M - 1, lastEnd = new Date(Date.UTC(Y, M - 1, 0)).getUTCDate();
+  const P = { this: [`${Y}-${pad(M)}-01`, hkDay(NOW)], last: [`${lastY}-${pad(lastM)}-01`, `${lastY}-${pad(lastM)}-${lastEnd}`] };
+  const iso = hkDay;
+  let period = 'this', fmt = 'csv';
+  openSheet(`<div class="sh"><h2 id="sh-t">Export statement</h2>${X}</div>
+    <div class="fl"><label>Period</label><div class="seg" role="group" aria-label="Period"><button data-p="this" aria-pressed="true">This month</button><button data-p="last" aria-pressed="false">Last month</button><button data-p="custom" aria-pressed="false">Custom</button></div></div>
+    <div class="acts2" id="xcustom" hidden><div class="fl"><label for="xf">From</label><input type="date" id="xf"></div><div class="fl"><label for="xt">To</label><input type="date" id="xt"></div></div>
+    <div class="fl"><label for="xa">Assets</label><select id="xa"><option value="*">All assets</option>${HOLD.map(h => `<option value="${h.sym}">${h.sym} — ${h.name}</option>`).join('')}</select></div>
+    <div class="fl"><label>Format</label><div class="seg" role="group" aria-label="Format"><button data-x-f="csv" aria-pressed="true">CSV · spreadsheet</button><button data-x-f="pdf" aria-pressed="false">PDF · statement</button></div></div>
+    <div class="info"><div><span>Transactions</span><b id="xn"></b></div><div><span>Delivery</span><b id="xd"></b></div></div>
+    <p class="err" id="xer" hidden></p>
+    <button class="btn full" id="xgo"><i class="ri-download-2-line"></i>Export</button>`);
+  const range = () => period === 'custom' ? [$('#xf').value, $('#xt').value] : P[period];
+  const rows = () => {
+    const [a, b] = range(), sym = $('#xa').value;
+    return TX.filter(t => (sym === '*' || t.sym === sym) && (!a || iso(txDate(t)) >= a) && (!b || iso(txDate(t)) <= b));
+  };
+  const upd = () => {
+    const [a, b] = range(), bad = a && b && a > b ? '"From" is after "To".' : '';
+    $('#xer').textContent = bad; $('#xer').hidden = !bad;
+    $('#xn').textContent = bad ? '—' : rows().length;
+    $('#xd').textContent = fmt === 'csv' ? 'Downloads to this device' : 'Emailed to w•••@chantrading.com.hk';
+    $('#xgo').disabled = !!bad || (period === 'custom' && !(a && b));
+    $('#xgo').innerHTML = fmt === 'csv' ? '<i class="ri-download-2-line"></i>Download CSV' : '<i class="ri-mail-send-line"></i>Email PDF';
+  };
+  sh.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { period = b.dataset.p; sh.querySelectorAll('[data-p]').forEach(x => x.setAttribute('aria-pressed', x === b)); $('#xcustom').hidden = period !== 'custom'; upd(); });
+  sh.querySelectorAll('[data-x-f]').forEach(b => b.onclick = () => { fmt = b.dataset.xF; sh.querySelectorAll('[data-x-f]').forEach(x => x.setAttribute('aria-pressed', x === b)); upd(); });
+  ['xf', 'xt', 'xa'].forEach(i => $('#' + i).onchange = upd);
+  $('#xgo').onclick = () => {
+    const list = rows(), [a, b] = range();
+    if (fmt === 'pdf') return doneSheet('Statement on its way', `Your PDF for ${a} to ${b} will arrive by email within a few minutes.`);
+    if (!list.length) return toast('No transactions in this period');
+    const cell = v => /[",\n]/.test(v) ? `"${String(v).replace(/"/g, '""')}"` : v;
+    const csv = [['Date (HKT)', 'Type', 'Asset', 'Amount', 'Value (HKD)', 'Counterparty', 'Status', 'Network', 'Tx hash / reference'],
+      ...list.map(t => [hkStamp(txDate(t)), { in: 'Receive', out: 'Send', swap: 'Swap' }[t.dir], t.sym,
+        (t.dir === 'out' ? '-' : '') + t.amt, (t.amt * BY[t.sym].px).toFixed(2), t.who, t.stx, txInternal(t) ? 'Internal' : txNet(t), txInternal(t) ? txRef(t) : txHash(t)])]
+      .map(r => r.map(cell).join(',')).join('\r\n');
+    const url = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv' }));   // BOM so Excel reads UTF-8
+    Object.assign(document.createElement('a'), { href: url, download: `javas-wallet-statement-${a}-to-${b}.csv` }).click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    doneSheet('Statement downloaded', `${list.length} transactions, ${a} to ${b}.`);
+  };
+  upd();
 }
 
 /* ================= global clicks ================= */
@@ -581,35 +1146,258 @@ document.addEventListener('click', e => {
   const go = e.target.closest('[data-go]'); if (go) { location.hash = '#' + go.dataset.go; return; }
   const dn = e.target.closest('[data-done]'); if (dn) { const [t, m] = dn.dataset.done.split('|'); doneSheet(t, m); return; }
   const tx = e.target.closest('[data-tx]'); if (tx) return txDetail(TX[tx.dataset.tx]);
+  const dm = e.target.closest('[data-demo]'); if (dm) { DEMO = dm.dataset.demo; render(); toast(`Preview: ${dm.textContent}`); return; }
   const b = e.target.closest('[data-act]'); if (!b) return;
   const a = b.dataset.act;
+  if (a === 'retry') { $('#pg').innerHTML = (isOffline() ? OFFBAR() : '') + SKELETON; setTimeout(() => { DEMO = 'normal'; render(); }, 1200); return; }
+  if (isOffline() && NEEDS_NET.includes(a)) return toast("You're offline — this needs a connection");
+  if (b.getAttribute('aria-disabled') === 'true') return toast(a === 'send' ? 'Nothing to send yet — add funds first' : 'Add funds first, then swap');
   if (a === 'send') send(b.dataset.sym);
   else if (a === 'receive') receive(b.dataset.sym);
   else if (a === 'transfer') transfer();
   else if (a === 'hide') { hidden = !hidden; try { localStorage.setItem('jvx:hide', hidden ? '1' : '0'); } catch (x) {} render(); }
   else if (a === 'cur') { const k = Object.keys(RATE); setCur(k[(k.indexOf(cur) + 1) % k.length]); render(); }
   else if (a === 'lock') lock();
+  else if (a === 'onboard') startOnboarding();
+  else if (a === 'addaddr') addAddress();
+  else if (a === 'changepin') changePin();
+  else if (a === 'backup') backup();
   else if (a === 'notes') openSheet(`<div class="sh"><h2 id="sh-t">Notifications</h2>${X}</div>
       <div class="act"><div class="ic"><i class="ri-arrow-up-line"></i></div><div class="m"><div class="t">BTC send confirming</div><div class="s">0.25 BTC to Fireblocks vault · 2/3 confirmations</div></div></div>
       <div class="act"><div class="ic"><i class="ri-shield-check-line"></i></div><div class="m"><div class="t">Address whitelisted</div><div class="s">OTC settlement ••Q7xk is now usable</div></div></div>`);
-  else toast(a === 'scan' ? 'Camera opens here on device' : a === 'export' ? 'Statement export — coming with the API' : 'Coming soon');
+  else if (a === 'scan') { if (sheet.open) sheet.close(); scanToSend(); }
+  else if (a === 'export') exportStatement();
+  else toast('Coming soon');
 });
+
+/* ================= gate: shared PIN parts ================= */
+const LETTERS = ['', 'ABC', 'DEF', 'GHI', 'JKL', 'MNO', 'PQRS', 'TUV', 'WXYZ'];
+const BRAND = (tag = 'The stablecoin desk for Hong Kong.') => `<div class="brand"><svg viewBox="0 0 224.34 303.37" aria-hidden="true"><use href="#jx"/></svg>
+  <div class="wm">Javas <span>Wallet</span></div><p>${tag}</p></div>`;
+const keypad = left => `<div class="keys">${[1,2,3,4,5,6,7,8,9].map(n => `<button data-k="${n}" aria-label="${n}">${n}<small>${LETTERS[n - 1]}</small></button>`).join('')}
+  ${left}<button data-k="0" aria-label="0">0<small></small></button><button class="fn" data-k="del" aria-label="Delete digit"><i class="ri-delete-back-2-line"></i></button></div>`;
+const cells = id => `<div class="cells" id="${id}" role="img" aria-label="PIN, 0 of 6 digits">${'<i></i>'.repeat(6)}</div>`;
+const paintCells = (id, n) => {
+  const box = $('#' + id); box.classList.remove('bad'); box.setAttribute('aria-label', `PIN, ${n} of 6 digits`);
+  box.querySelectorAll('i').forEach((c, i) => { c.classList.toggle('on', i < n); c.classList.toggle('cur', i === n); });
+};
+const failCells = (id, msgEl, msg) => {
+  const box = $('#' + id); box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake', 'bad');
+  msgEl.textContent = msg; msgEl.classList.add('err');
+  // empty the cells once the shake ends, so the next try starts clean (red border stays until a key is pressed)
+  setTimeout(() => {
+    box.querySelectorAll('i').forEach((c, i) => { c.classList.remove('on'); c.classList.toggle('cur', i === 0); });
+    const n = $('#ocount'); if (n) n.textContent = '0 / 6';
+  }, 320);
+};
+const hkt = () => new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Hong_Kong' }) + ' HKT';
 
 /* ================= lock ================= */
 let pin = '';
-const lock = () => { pin = ''; dots(); $('#lock').hidden = false; };
-const dots = () => document.querySelectorAll('#pins i').forEach((d, i) => d.classList.toggle('on', i < pin.length));
-const unlock = () => { $('#lock').hidden = true; render(); };
+const lockEl = $('#lock');
+const lock = () => {
+  pin = '';
+  lockEl.innerHTML = `<div class="wrap">
+    <div class="gbar"><span class="lbl">Wallet locked</span><span class="sp"></span><span class="chip mono">${hkt()}</span></div>
+    <div class="grow"></div>
+    <div class="who2"><div class="coin" aria-hidden="true">WC</div><h2>Welcome back, Wing</h2><span class="meta">Corporate · UID 9642943</span></div>
+    ${cells('lpins')}
+    <p class="pmsg" id="lmsg">Enter your 6-digit PIN</p>
+    ${keypad(`<button class="fn on" data-k="bio" aria-label="Unlock with Face ID"><i class="ri-scan-2-line"></i></button>`)}
+    <div class="row2"><span class="fine" style="padding:0">Preview · any 6 digits unlock</span><a href="#" data-k="forgot">Forgot PIN?</a></div>
+  </div>`;
+  paintCells('lpins', 0);
+  lockEl.hidden = false;
+};
+const unlock = () => { lockEl.hidden = true; render(); };
 const key = k => {
+  if (k === 'forgot') { toast('Sign in again to set a new PIN'); return startOnboarding('signin'); }
   if (k === 'del') pin = pin.slice(0, -1);
   else if (k === 'bio') return unlock();   // ponytail: real Face ID comes from the native shell (WebAuthn / LocalAuthentication)
   else if (pin.length < 6) pin += k;
-  dots();
+  paintCells('lpins', pin.length);
+  $('#lmsg').classList.remove('err'); $('#lmsg').textContent = 'Enter your 6-digit PIN';
   if (pin.length === 6) setTimeout(unlock, 160);
 };
-$('#pad').onclick = e => { const b = e.target.closest('button'); if (b) key(b.dataset.k || b.textContent.trim()); };
-addEventListener('keydown', e => { if ($('#lock').hidden) return; if (/^\d$/.test(e.key)) key(e.key); else if (e.key === 'Backspace') key('del'); });
+lockEl.addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b) { e.preventDefault(); key(b.dataset.k); } });
+addEventListener('keydown', e => { if (lockEl.hidden || !$('#onb').hidden) return; if (/^\d$/.test(e.key)) key(e.key); else if (e.key === 'Backspace') key('del'); });
+
+/* ================= onboarding (first run) =================
+   welcome → sign in with the exchange account → confirm account → PIN → confirm → Face ID → ready.
+   ponytail: sign-in is display only; wire to the exchange auth API. "onboarded" is a
+   per-browser flag — the native shell keeps this in secure storage. */
+const onb = $('#onb');
+// mode 'setup' is first run; 'change' reuses the PIN screens from Settings (current → new → confirm)
+const ONB = { mode: 'setup', step: 'welcome', pin: '', first: '', old: '', email: '', bio: false };
+const NUM = { setup: { signin: 1, account: 2, pin: 3, confirm: 3, bio: 4 }, change: { cur: 1, pin: 2, confirm: 3 } };
+const onbBar = back => {
+  const n = NUM[ONB.mode][ONB.step], of = ONB.mode === 'change' ? 3 : 4, pad = v => String(v).padStart(2, '0');
+  return `<div class="gbar">${back ? `<button class="back" data-ob="${back}" aria-label="${back === 'close' ? 'Cancel' : 'Back'}"><i class="ri-${back === 'close' ? 'close' : 'arrow-left'}-line"></i></button>` : ''}
+  <span class="lbl">${ONB.mode === 'change' ? 'Change PIN' : 'Step'} ${pad(n)} / ${pad(of)}</span><span class="sp"></span><button class="chip" data-ob="lang">EN <i class="ri-arrow-down-s-line"></i></button></div>${steps(n, of)}`;
+};
+const onbDraw = () => {
+  const s = ONB.step, w = onb.querySelector('.wrap');
+  if (s === 'welcome') w.innerHTML = `
+    <div class="gbar"><span class="sp"></span><button class="chip" data-ob="lang">EN <i class="ri-arrow-down-s-line"></i></button></div>
+    ${BRAND()}
+    <div class="feat">
+      <div><i class="ri-shield-check-line" style="--tone:#f7dcd9"></i><span><b>Whitelisted sends only</b><small>2FA on every send, approver for large ones</small></span><em>01</em></div>
+      <div><i class="ri-exchange-funds-line" style="--tone:#ded6f0"></i><span><b>Linked to your exchange</b><small>Instant, free transfers both ways</small></span><em>02</em></div>
+      <div><i class="ri-coins-line" style="--tone:#f8e7c2"></i><span><b>HKD, stablecoins and crypto</b><small>One balance, valued in HKD</small></span><em>03</em></div>
+    </div>
+    <div class="grow"></div>
+    <button class="btn cta" data-ob="signin">Get started</button>
+    <p class="fine">By continuing you agree to the Javas <a href="#" data-ob="lang">Terms</a> and <a href="#" data-ob="lang">Privacy Policy</a>.</p>`;
+  else if (s === 'signin') {
+    w.innerHTML = `${onbBar('welcome')}
+    <div><h2>Sign in to link</h2><p class="sub">Use your Javas Exchange login. The wallet links to that account.</p></div>
+    <div class="gseg"><button aria-pressed="true">Sign in</button><button aria-pressed="false" data-ob="create">Create account</button></div>
+    <form id="ofm" novalidate style="display:grid;gap:var(--s4)">
+      <div><label for="oe">Email address <span class="req">*</span></label><input id="oe" type="email" autocomplete="username" placeholder="you@company.com.hk" value="${ONB.email}"></div>
+      <div><label for="op">Password <span class="req">*</span></label><div class="pw"><input id="op" type="password" autocomplete="current-password">
+        <button type="button" id="oeye" aria-label="Show password"><i class="ri-eye-line"></i></button></div></div>
+      <div class="row2"><label><input type="checkbox" checked> Remember me</label><a href="#" data-ob="forgotpw">Forgot password?</a></div>
+      <p class="err" id="oer" hidden style="margin:0"></p>
+      <button class="btn cta" type="submit">Sign in</button>
+    </form>
+    <div class="or"><span>or continue with</span></div>
+    <div class="soc"><button class="btn ghost tall" data-ob="account"><i class="ri-google-fill"></i>Google</button><button class="btn ghost tall" data-ob="account"><i class="ri-key-2-line"></i>Passkey</button></div>
+    <p class="fine">Preview — any email and password work. Nothing is sent.</p>`;
+    $('#oeye').onclick = () => { const p = $('#op'), show = p.type === 'password'; p.type = show ? 'text' : 'password';
+      $('#oeye').innerHTML = `<i class="${show ? 'ri-eye-off-line' : 'ri-eye-line'}"></i>`; $('#oeye').setAttribute('aria-label', show ? 'Hide password' : 'Show password'); };
+    $('#ofm').onsubmit = e => { e.preventDefault();
+      const em = $('#oe').value.trim(), bad = !/^\S+@\S+\.\S+$/.test(em) ? 'Enter a valid email address.' : !$('#op').value ? 'Enter your password.' : '';
+      $('#oer').textContent = bad; $('#oer').hidden = !bad; if (bad) return;
+      ONB.email = em; ONB.step = 'account'; onbDraw(); };
+  }
+  else if (s === 'account') w.innerHTML = `${onbBar('signin')}
+    <div><h2>Is this your account?</h2><p class="sub">We found this Javas Exchange account. Your wallet will link to it.</p></div>
+    <section class="card hero">
+      <div class="pair"><div class="coin lg" aria-hidden="true">WC</div><div><div class="nm">Wing Chan Trading Ltd</div><div class="sm">${ONB.email || 'wing@chantrading.com.hk'}</div></div></div>
+      <div class="quad">
+        <div><div class="k">Account</div><div class="v">Corporate</div></div>
+        <div><div class="k">UID</div><div class="v" style="font-family:var(--mono)">9642943</div></div>
+        <div><div class="k">Verification</div><div class="v">Level 3</div></div>
+        <div><div class="k">2FA</div><div class="v"><span class="tag ok">On</span></div></div>
+      </div>
+    </section>
+    <div class="grow"></div>
+    <button class="btn cta" data-ob="pin">Link this account</button>
+    <button class="btn ghost tall" data-ob="signin">Use a different account</button>`;
+  else if (PIN_COPY[s]) {
+    const c = PIN_COPY[s], change = ONB.mode === 'change';
+    const rules = s === 'cur' ? null : s === 'pin'
+      ? [['len', '6 digits'], ['rep', 'Not one digit repeated'], ['seq', 'Not a run like 123456'], ...(change ? [['diff', 'Different from your current PIN']] : [])]
+      : [['len', '6 digits'], ['match', 'Matches your new PIN']];
+    const back = s === 'cur' ? 'close' : s === 'pin' ? (change ? 'cur' : 'account') : 'pin';
+    w.innerHTML = `${onbBar(back)}
+    <div><h2>${s === 'pin' && change ? 'Choose a new PIN' : c.h}</h2><p class="sub">${c.sub}</p></div>
+    <section class="card hero pinc">
+      <div class="kh"><span class="k">${c.k} · <span id="ocount">0 / 6</span></span><span class="pmsg" id="omsg">${c.msg}</span></div>
+      ${cells('opins')}
+    </section>
+    ${rules ? `<section class="card rules">
+      <h3>PIN rules</h3>
+      ${rules.map(([k, t]) => `<div class="rule" data-r="${k}"><i class="ri-checkbox-blank-circle-line"></i><span>${t}</span></div>`).join('')}
+      <p class="foot"><i class="ri-lock-2-line"></i>On this device only · never sent</p>
+    </section>` : `<section class="card rules">
+      <h3>Before you change it</h3>
+      <div class="rule ok"><i class="ri-shield-check-line"></i><span>Your sends, 2FA and address book don't change</span></div>
+      <div class="rule ok"><i class="ri-scan-2-line"></i><span>Face ID keeps working with the new PIN</span></div>
+      <div class="rule"><i class="ri-error-warning-line" style="color:var(--flag)"></i><span>5 wrong tries locks the wallet for 30 min</span></div>
+      <p class="foot"><i class="ri-question-line"></i><a href="#" data-ob="forgotpin" style="color:inherit">Forgot it? Sign in again to reset</a></p>
+    </section>`}
+    <div class="grow"></div>
+    ${keypad('<span></span>')}`;
+    paintCells('opins', 0);
+  }
+  else if (s === 'bio') w.innerHTML = `${onbBar('pin')}
+    <div><h2>Unlock with Face ID?</h2><p class="sub">Faster than your PIN. Every send still needs your 2FA code.</p></div>
+    <section class="card bio"><div class="tile"><i class="ri-scan-2-line"></i></div><b>Face ID</b><small>Used only on this device. You can turn it off in Settings.</small></section>
+    <div class="grow"></div>
+    <button class="btn cta" data-ob="ready" data-bio="1">Turn on Face ID</button>
+    <button class="btn ghost tall" data-ob="ready">Not now</button>`;
+  else if (s === 'ready') w.innerHTML = `
+    <div class="gbar"><span class="lbl">Setup complete</span></div>
+    <div class="grow"></div>
+    ${BRAND('Your wallet is ready.')}
+    <section class="card">
+      <h3>Summary</h3>
+      <div class="info">
+        <div><span>Linked to</span><b>Javas Exchange · UID 9642943</b></div>
+        <div><span>PIN</span><b><span class="tag ok">Set</span></b></div>
+        <div><span>Face ID</span><b>${ONB.bio ? 'On' : 'Off'}</b></div>
+        <div><span>Sends</span><b>Whitelisted addresses · 2FA</b></div>
+      </div>
+    </section>
+    <div class="grow"></div>
+    <button class="btn cta" data-ob="finish">Open wallet</button>`;
+  onb.scrollTop = 0;
+};
+const PIN_COPY = {
+  cur: { h: 'Enter current PIN', sub: "Confirm it's you before choosing a new one.", k: 'Current PIN', msg: 'Enter 6 digits' },
+  pin: { h: 'Create a PIN', sub: 'Six digits to unlock the wallet. Avoid birthdays and repeats.', k: 'New PIN', msg: 'Choose 6 digits' },
+  confirm: { h: 'Confirm your PIN', sub: 'Enter the same six digits again.', k: 'Confirm PIN', msg: 'Re-enter 6 digits' },
+};
+// live PIN rules: ✓ when met, ✕ as soon as the digits so far break one, blank while undecided
+const pinRules = p => {
+  const run = p.length > 2 && ('0123456789'.includes(p) || '9876543210'.includes(p)), same = p.length > 1 && /^(\d)\1+$/.test(p), full = p.length === 6;
+  const st = {
+    len: full ? 'ok' : '',
+    rep: same ? 'no' : full ? 'ok' : '',
+    seq: run ? 'no' : full ? 'ok' : '',
+    match: p && !ONB.first.startsWith(p) ? 'no' : full ? 'ok' : '',
+    diff: full && p === ONB.old ? 'no' : full ? 'ok' : '',
+  };
+  onb.querySelectorAll('[data-r]').forEach(r => {
+    const v = st[r.dataset.r]; r.className = 'rule ' + v;
+    r.querySelector('i').className = v === 'ok' ? 'ri-checkbox-circle-fill' : v === 'no' ? 'ri-close-circle-fill' : 'ri-checkbox-blank-circle-line';
+  });
+  const c = $('#ocount'); if (c) c.textContent = `${p.length} / 6`;
+};
+const opinKey = k => {
+  if (k === 'del') ONB.pin = ONB.pin.slice(0, -1); else if (ONB.pin.length < 6) ONB.pin += k;
+  paintCells('opins', ONB.pin.length);
+  pinRules(ONB.pin);
+  const m = $('#omsg'); m.classList.remove('err'); m.textContent = PIN_COPY[ONB.step].msg;
+  if (ONB.pin.length < 6) return;
+  setTimeout(() => {
+    const p = ONB.pin; ONB.pin = '';
+    // ponytail: preview accepts any current PIN; the native shell checks it against secure storage
+    if (ONB.step === 'cur') { ONB.old = p; ONB.step = 'pin'; onbDraw(); }
+    else if (ONB.step === 'pin') {
+      if (/^(\d)\1{5}$/.test(p) || '0123456789'.includes(p) || '9876543210'.includes(p)) return failCells('opins', m, 'Too easy to guess. Try another.');
+      if (p === ONB.old) return failCells('opins', m, 'Pick a PIN different from your current one.');
+      ONB.first = p; ONB.step = 'confirm'; onbDraw();
+    } else if (p !== ONB.first) failCells('opins', m, "PINs don't match. Try again.");
+    else if (ONB.mode === 'change') { onb.hidden = true; toast('PIN changed'); }
+    else { ONB.step = 'bio'; onbDraw(); }
+  }, 140);
+};
+onb.addEventListener('click', e => {
+  const k = e.target.closest('.keys [data-k]'); if (k) return opinKey(k.dataset.k);
+  const b = e.target.closest('[data-ob]'); if (!b) return;
+  e.preventDefault();
+  const to = b.dataset.ob;
+  if (to === 'lang') return toast('Coming soon');
+  if (to === 'close') { onb.hidden = true; return; }
+  if (to === 'forgotpin') { toast('Sign in again to set a new PIN'); return startOnboarding('signin'); }
+  if (to === 'forgotpw') return toast('Reset your password in the Javas Exchange app');
+  if (to === 'create') return open('https://javas-exchange-mobile.vercel.app', '_blank', 'noopener');
+  if (to === 'finish') { try { localStorage.setItem('jvx:onboarded', '1'); } catch (x) {} onb.hidden = true; lockEl.hidden = true; render(); return; }
+  if (b.dataset.bio) { ONB.bio = true; toast('Face ID turned on'); }
+  ONB.pin = ''; ONB.step = to; onbDraw();
+});
+addEventListener('keydown', e => { if (onb.hidden || !PIN_COPY[ONB.step]) return; if (/^\d$/.test(e.key)) opinKey(e.key); else if (e.key === 'Backspace') opinKey('del'); });
+const startOnboarding = (step = 'welcome', mode = 'setup') => { Object.assign(ONB, { mode, step, pin: '', first: '', old: '', email: '', bio: false }); onbDraw(); onb.hidden = false; };
+const changePin = () => startOnboarding('cur', 'change');
+
+/* ================= boot: splash → setup or lock ================= */
+let onboarded = false;
+try { onboarded = localStorage.getItem('jvx:onboarded') === '1'; } catch (e) {}
+if (onboarded) lock(); else startOnboarding();
 render();
+setTimeout(() => { const s = $('#splash'); s.classList.add('out'); setTimeout(() => s.remove(), 500); }, 1300);
 </script>
 </body>
 </html>
